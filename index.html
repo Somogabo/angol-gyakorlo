@@ -1,13 +1,258 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="hu">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0; url=auto-index.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GOANGOL – Főmenü</title>
-  </head>
-  <body>
-    Átirányítás... Ha nem történik meg, kattints ide:
-    <a href="auto-index.html">auto-index.html</a>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GOANGOL – Főmenü</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 28px 18px;
+      color: #1f2a44;
+      display: flex;
+      justify-content: center;
+    }
+
+    .wrap {
+      width: min(1100px, 100%);
+    }
+
+    header {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 18px;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: clamp(26px, 3.2vw, 38px);
+      letter-spacing: .3px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: .9;
+      font-weight: 600;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 16px 0 22px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.92);
+      color: #203055;
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 8px 22px rgba(0,0,0,.15);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
+    }
+
+    .searchbar {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 26px;
+    }
+
+    .searchbar input {
+      width: min(420px, 100%);
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: none;
+      font-size: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(0,0,0,.18);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0,0,0,.25);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .pv { background: #ff8a00; }
+    .ex { background: #2dd4bf; }
+    .gr { background: #60a5fa; }
+    .sz { background: #fb7185; }
+
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .lesson {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f3f5fa;
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .badge {
+      background: #e5e7eb;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .new {
+      background: #22c55e;
+      color: #fff;
+      margin-left: 6px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      color: rgba(255,255,255,.85);
+      font-size: 13px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <h1>📚 GOANGOL – Főmenü</h1>
+      <p>Válassz leckét (Flashcards)</p>
+    </header>
+
+    <div class="topbar">
+      <a class="btn" href="auto-index.html">📋 Automatikus lecke lista</a>
+    </div>
+
+    <div class="searchbar">
+      <input type="text" placeholder="🔍 Keresés (később aktiváljuk)">
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon pv">PV</div>
+          <h2>Phrasal Verbs</h2>
+        </div>
+
+        <div class="lesson">
+          <span>alapfok 15</span>
+          <span class="badge">Flashcards</span>
+        </div>
+
+        <div class="lesson">
+          <span>alapfok 16</span>
+          <span class="badge">Flashcards <span class="new">ÚJ</span></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon ex">EX</div>
+          <h2>Expressions / Kifejezések</h2>
+        </div>
+
+        <div class="lesson">
+          <span>alapfok 18</span>
+          <span class="badge">Flashcards</span>
+        </div>
+
+        <div class="lesson">
+          <span>19</span>
+          <span class="badge">Flashcards</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon gr">NY</div>
+          <h2>Nyelvtan</h2>
+        </div>
+
+        <div class="lesson">
+          <span>Present Perfect</span>
+          <span class="badge">Flashcards</span>
+        </div>
+
+        <div class="lesson">
+          <span>Megszámlálható / megszámlálhatatlan</span>
+          <span class="badge">Flashcards</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="icon sz">SZ</div>
+          <h2>Szituációk</h2>
+        </div>
+
+        <div class="lesson">
+          <span>Golife elektromos kütyü</span>
+          <span class="badge">Flashcards</span>
+        </div>
+      </div>
+
+    </div>
+
+    <footer>
+      Tipp: ha új leckét teszel a flashcards mappába és commitolsz,  
+      az automatikus lista frissül.
+    </footer>
+
+  </div>
+</body>
 </html>
