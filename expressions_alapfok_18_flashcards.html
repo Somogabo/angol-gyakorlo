@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashcards – Sablon</title>
+  <style>
+    :root{
+      --bg1:#6f79ff;
+      --bg2:#6a4fb1;
+      --card:#ffffff;
+      --shadow: 0 18px 45px rgba(0,0,0,.25);
+      --text:#1f2a44;
+      --muted:#6b7280;
+      --accent:#6a4fb1;
+      --accent2:#4f6bff;
+      --btn:#5b6dff;
+      --btn2:#6a4fb1;
+      --border: rgba(31,42,68,.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      min-height:100vh;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      color:var(--text);
+    }
+    .back-wrap{
+      position:fixed;
+      top:18px;
+      left:18px;
+      z-index:10;
+    }
+    .back{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      background: rgba(255,255,255,.95);
+      border:1px solid rgba(255,255,255,.55);
+      border-radius:10px;
+      text-decoration:none;
+      color:var(--accent2);
+      font-weight:700;
+      box-shadow: 0 10px 22px rgba(0,0,0,.12);
+    }
+    .wrap{
+      width:min(820px, 100%);
+      display:flex;
+      justify-content:center;
+    }
+    .card{
+      width:min(720px, 100%);
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 26px 26px 18px;
+    }
+    .title{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 800;
+      color: var(--accent2);
+      margin: 4px 0 14px;
+      text-align:center;
+    }
+    .divider{
+      height:6px;
+      width:100%;
+      border-radius:999px;
+      background: rgba(31,42,68,.12);
+      margin: 10px 0 18px;
+    }
+    .tabs{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin-bottom: 14px;
+    }
+    .tab{
+      width: 220px;
+      max-width: 45%;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 2px solid var(--accent2);
+      background: transparent;
+      color: var(--accent2);
+      font-weight: 800;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      background: linear-gradient(135deg, var(--btn), var(--btn2));
+      border-color: transparent;
+      color:#fff;
+    }
+    .panel{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fbfbff;
+    }
+    .prompt{
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 10px;
+      color: var(--text);
+      text-align:left;
+    }
+    .hint{
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input[type="text"]{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 10px;
+      border: 2px solid rgba(79,107,255,.35);
+      outline:none;
+      font-size: 16px;
+      background:#fff;
+    }
+    input[type="text"]:focus{
+      border-color: rgba(79,107,255,.9);
+      box-shadow: 0 0 0 4px rgba(79,107,255,.15);
+    }
+    .btn{
+      width:100%;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border:0;
+      cursor:pointer;
+      font-weight: 900;
+      color:#fff;
+      background: linear-gradient(135deg, var(--btn), var(--btn2));
+      font-size: 16px;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      margin-top: 10px;
+      flex-wrap:wrap;
+    }
+    .btn.secondary{
+      background: #fff;
+      color: var(--accent2);
+      border: 2px solid rgba(79,107,255,.5);
+    }
+    .btn.small{
+      width:auto;
+      padding:10px 12px;
+      font-size: 14px;
+    }
+    .feedback{
+      margin-top: 10px;
+      font-weight: 800;
+      min-height: 22px;
+    }
+    .ok{color:#16a34a}
+    .bad{color:#dc2626}
+    .answer{
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: rgba(79,107,255,.08);
+      border: 1px solid rgba(79,107,255,.20);
+      border-radius: 10px;
+      display:none;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .meta{
+      margin-top: 14px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .note{
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+      text-align:center;
+      max-width: 720px;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.12);
+      color:#fff;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- VISSZA GOMB (a flashcards mappából az index.html-re) -->
+  <div class="back-wrap">
+    <a class="back" href="../index.html">⬅ Vissza a főmenübe</a>
+  </div>
+
+  <div class="wrap">
+    <div class="card" role="application" aria-label="Flashcards gyakorló">
+      <div class="title">🎯 <span id="appTitle">Saját Flashcards</span></div>
+
+      <div class="tabs">
+        <button class="tab active" id="tabWrite" type="button">✍️ Írás mód</button>
+        <button class="tab" id="tabSpeak" type="button">🎧 Beszéd mód</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="panel" id="panelWrite">
+        <div class="prompt" id="huPrompt">—</div>
+        <p class="hint">Írd be az angol megfelelőjét (kis/nagybetű nem számít, pont/extra szóköz sem).</p>
+
+        <input id="answerInput" type="text" placeholder="Írd be az angol mondatot/kifejezést..." autocomplete="off" />
+        <button class="btn" id="checkBtn" type="button">Ellenőrzés</button>
+
+        <div class="row">
+          <button class="btn secondary small" id="showBtn" type="button">Megmutat</button>
+          <button class="btn secondary small" id="nextBtn" type="button">Következő</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="answer" id="answerBox"></div>
+
+        <div class="meta" id="counter">Kártya 0 / 0</div>
+      </div>
+
+      <div class="panel" id="panelSpeak" style="display:none">
+        <div class="prompt" id="speakHu">—</div>
+        <p class="hint">Itt a cél: hallgasd meg az angol megoldást, és ismételd hangosan. (A böngészős beszédfelismerés file:// módban nem mindig működik.)</p>
+
+        <div class="answer" id="speakEn" style="display:block"></div>
+
+        <div class="row">
+          <button class="btn small" id="playBtn" type="button">🔊 Lejátszás</button>
+          <button class="btn secondary small" id="speakNextBtn" type="button">Következő</button>
+        </div>
+
+        <div class="meta" id="speakCounter">Kártya 0 / 0</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note">
+    Tipp: ha szerkeszted a listát, elég a <span class="kbd">FLASHCARDS</span> részt átírni lentebb.
+  </div>
+
+<script>
+/* =========================================================
+   1) Ezt a részt szoktad csak szerkeszteni (FLASHCARDS)
+   - hu: magyar (kérdés)
+   - en: angol (helyes válasz)
+   ========================================================= */
+const FLASHCARDS = [
+  { hu: "Nyugodj meg.", en: "Take it easy." },
+  { hu: "Soha nem leszek popsztár. Nincs esélyem.", en: "I will never become a pop star. I have no chance." },
+  { hu: "Hideg van kint. Engedj be, kérlek.", en: "It is cold outside. Let me in, please." },
+  { hu: "Az emberek általában 8-kor kezdenek dolgozni.", en: "People usually start work at 8 a.m." },
+  { hu: "Ne gúnyolódj rajta. A barátom.", en: "Do not make fun of him. He is my friend." },
+  { hu: "A verseny a baleset ellenére is folytatódik.", en: "The race goes on despite the accident." },
+  { hu: "Fred éppen a német vizsgáját teszi.", en: "Fred is taking his German exam." },
+  { hu: "Nem írtam fel a címét. Hogyan találom meg?", en: "I did not put down her address. How will I find her?" },
+  { hu: "A félév végén vizsgát tesznek.", en: "At the end of the semester they will take an exam." },
+  { hu: "Az autója elvesztette a kerekeit. Nem volt esélye nyerni.", en: "His car lost its wheels. He had no chance to win." },
+  { hu: "Régen nagyon rosszak voltak a fogai. A gyerekek mindig csúfolták.", en: "She used to have very bad teeth. Children always made fun of her." },
+  { hu: "Soha nem kezdenek dolgozni 9 előtt.", en: "They never start work before 9." },
+  { hu: "Szeretném felírni az email címedet. Mi az?", en: "I want to put down your email address. What is it?" },
+  { hu: "Nyugodj meg. Csak egy madár, nem egy szörny.", en: "Take it easy. It is just a bird, not a monster." },
+  { hu: "A parti a tűzijáték után is folytatódik reggel 4-ig.", en: "The party will go on after the fireworks until 4 a.m." },
+  { hu: "Sétálnunk kellene. Remek az idő.", en: "We should take a walk. The weather is great." }
+];
+
+/* (opcionális) cím átírása */
+const TITLE = "Expressions – Alapfok (18. fejezet)";
+
+/* =========================================================
+   2) Innentől logika – általában nem kell piszkálni
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+
+$("appTitle").textContent = TITLE;
+
+let i = 0;
+let mode = "write";
+
+function norm(s){
+  return (s || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/[“”„"]/g, '"')
+    .replace(/[’]/g, "'")
+    .replace(/[.?!]+$/g, "")
+    .toLowerCase();
+}
+
+function setCard(index){
+  const c = FLASHCARDS[index];
+  if(!c) return;
+
+  // Write
+  $("huPrompt").textContent = c.hu;
+  $("answerInput").value = "";
+  $("feedback").textContent = "";
+  $("answerBox").style.display = "none";
+  $("answerBox").textContent = "";
+  $("counter").textContent = `Kártya ${index + 1} / ${FLASHCARDS.length}`;
+
+  // Speak
+  $("speakHu").textContent = c.hu;
+  $("speakEn").textContent = `✅ ${c.en}`;
+  $("speakCounter").textContent = `Kártya ${index + 1} / ${FLASHCARDS.length}`;
+
+  $("answerInput").focus();
+}
+
+function showAnswer(){
+  const c = FLASHCARDS[i];
+  $("answerBox").style.display = "block";
+  $("answerBox").textContent = `✅ ${c.en}`;
+}
+
+function nextCard(){
+  i = (i + 1) % FLASHCARDS.length;
+  setCard(i);
+}
+
+function check(){
+  const c = FLASHCARDS[i];
+  const user = norm($("answerInput").value);
+  const correct = norm(c.en);
+
+  if(!user){
+    $("feedback").className = "feedback bad";
+    $("feedback").textContent = "Írj be valamit 🙂";
+    return;
+  }
+
+  if(user === correct){
+    $("feedback").className = "feedback ok";
+    $("feedback").textContent = "Helyes! ✅";
+    // kis késleltetés, hogy lásd a visszajelzést
+    setTimeout(nextCard, 450);
+  }else{
+    $("feedback").className = "feedback bad";
+    $("feedback").textContent = "Nem teljesen. Próbáld újra, vagy kattints a Megmutat gombra.";
+  }
+}
+
+function speak(){
+  const c = FLASHCARDS[i];
+  if(!("speechSynthesis" in window)){
+    alert("A böngésződ nem támogatja a felolvasást.");
+    return;
+  }
+  const u = new SpeechSynthesisUtterance(c.en);
+  u.lang = "en-US";
+  u.rate = 0.95;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+// Tabs
+$("tabWrite").addEventListener("click", () => {
+  mode = "write";
+  $("tabWrite").classList.add("active");
+  $("tabSpeak").classList.remove("active");
+  $("panelWrite").style.display = "block";
+  $("panelSpeak").style.display = "none";
+  setCard(i);
+});
+$("tabSpeak").addEventListener("click", () => {
+  mode = "speak";
+  $("tabSpeak").classList.add("active");
+  $("tabWrite").classList.remove("active");
+  $("panelWrite").style.display = "none";
+  $("panelSpeak").style.display = "block";
+  // ne töröljük a kártyát, csak frissítjük a kijelzést
+  setCard(i);
+});
+
+// Buttons
+$("checkBtn").addEventListener("click", check);
+$("showBtn").addEventListener("click", showAnswer);
+$("nextBtn").addEventListener("click", nextCard);
+$("playBtn").addEventListener("click", speak);
+$("speakNextBtn").addEventListener("click", nextCard);
+
+// Enter = ellenőrzés
+$("answerInput").addEventListener("keydown", (e) => {
+  if(e.key === "Enter") check();
+});
+
+// Start
+if(FLASHCARDS.length === 0){
+  $("huPrompt").textContent = "Nincs kártya a listában. Add hozzá a FLASHCARDS tömbhöz.";
+  $("speakHu").textContent = $("huPrompt").textContent;
+  $("counter").textContent = "Kártya 0 / 0";
+  $("speakCounter").textContent = "Kártya 0 / 0";
+}else{
+  setCard(i);
+}
+</script>
+
+</body>
+</html>

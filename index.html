@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GOANGOL – Főmenü</title>
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      min-height:100vh;
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      padding: 28px 18px;
+      color:#1f2a44;
+      display:flex;
+      justify-content:center;
+    }
+    .wrap{width:min(980px,100%)}
+    .header{
+      text-align:center;
+      color:#fff;
+      margin-bottom: 18px;
+    }
+    .header h1{
+      margin:0 0 8px;
+      font-size: clamp(26px, 3.2vw, 38px);
+      letter-spacing:.2px;
+    }
+    .header p{
+      margin:0;
+      opacity:.92;
+      font-weight: 700;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .card{
+      background: rgba(255,255,255,.98);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      padding: 16px 16px 10px;
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    .card h2{
+      margin: 2px 0 10px;
+      font-size: 18px;
+      color:#355cff;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    ul{list-style:none; padding:0; margin:0}
+    li{margin: 10px 0}
+    a{
+      display:block;
+      text-decoration:none;
+      color:#1f2a44;
+      font-weight: 800;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(31,42,68,.12);
+      background: rgba(79,107,255,.06);
+      transition: transform .08s ease, background .15s ease;
+    }
+    a:hover{
+      transform: translateY(-1px);
+      background: rgba(79,107,255,.12);
+    }
+    .sub{
+      display:block;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(31,42,68,.65);
+    }
+    .footer{
+      text-align:center;
+      color: rgba(255,255,255,.9);
+      font-weight: 700;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>📚 GOANGOL – Főmenü</h1>
+      <p>Válassz leckét (Flashcards)</p>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>⚡ Phrasal Verbs</h2>
+        <ul>
+          <li><a href="flashcards/phrasal_verbs_alapfok_15_flashcards.html">Alapfok 15<span class="sub">Flashcards</span></a></li>
+          <li><a href="flashcards/phrasal_verbs_alapfok_16_flashcards.html">Alapfok 16<span class="sub">Flashcards</span></a></li>
+          <li><a href="flashcards/phrasal_verbs_flashcards.html">Alapfok 17<span class="sub">Flashcards</span></a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>🧩 Expressions / Kifejezések</h2>
+        <ul>
+          <li><a href="flashcards/expressions_alapfok_18_flashcards.html">Expressions – Alapfok 18<span class="sub">Flashcards</span></a></li>
+          <li><a href="flashcards/expressions_19_flashcards.html">Expressions – Alapfok 19<span class="sub">Flashcards</span></a></li>
+          <li><a href="flashcards/kifejezesek_alapfok_20_flashcards.html">Kifejezések – Alapfok 20<span class="sub">Flashcards</span></a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>📘 Nyelvtan</h2>
+        <ul>
+          <li><a href="flashcards/present_perfect_flashcards.html">Present Perfect<span class="sub">Flashcards</span></a></li>
+          <li><a href="flashcards/megszamlalhato_megszamlalhatatlan_alapfok.html">Megszámlálható / megszámlálhatatlan<span class="sub">Flashcards</span></a></li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>🛒 Szituációk</h2>
+        <ul>
+          <li><a href="flashcards/golife_elektromos_kutyu_flashcards.html">GoLife – elektromos kütyü<span class="sub">Flashcards</span></a></li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="footer">
+      Tipp: ha új leckét adsz hozzá, elég az indexben a megfelelő csoport alá betenni a linket.
+    </div>
+  </div>
+</body>
+</html>

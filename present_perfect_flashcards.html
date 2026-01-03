@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Present Perfect Gyakorló</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        
+            position: relative;}
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .hungarian {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        
+        .check-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .next-btn {
+            background: #28a745;
+            color: white;
+            display: none;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .correct-answer {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .stats {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .completion {
+            text-align: center;
+            display: none;
+        }
+        
+        .completion h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 40px;
+            margin-top: 20px;
+        }
+        
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .voice-btn {
+            background: #dc3545;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .voice-btn.listening {
+            background: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .voice-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border: 2px solid #2196f3;
+            display: none;
+        }
+        
+        .voice-result strong {
+            color: #1976d2;
+        }
+        
+        .audio-playback {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            display: none;
+        }
+        
+        .audio-playback audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .playback-label {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+    
+        /* ⬅ VISSZA A FŐMENÜBE GOMB */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            background: #ffffff;
+            color: #667eea;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: #f0f0f0;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- ⬅ Vissza a főmenübe -->
+    <a href="../index.html" class="back-button">⬅ Vissza a főmenübe</a>
+
+    <div class="container">
+        <h1>🎯 Present Perfect Alapfok</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('write')">✍️ Írás mód</button>
+            <button class="mode-btn" onclick="setMode('speak')">🎤 Beszéd mód</button>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div id="cardContainer">
+            <div class="card">
+                <div class="hungarian" id="hungarianText"></div>
+                <input type="text" id="answerInput" placeholder="Írd be az angol mondatot..." autocomplete="off">
+                <div class="buttons" id="writeButtons">
+                    <button class="check-btn" onclick="checkAnswer()">Ellenőrzés</button>
+                    <button class="next-btn" id="nextBtn" onclick="nextCard()">Következő →</button>
+                </div>
+                <div class="buttons" id="voiceButtons" style="display: none;">
+                    <button class="voice-btn" id="voiceBtn" onclick="startListening()">
+                        <span id="micIcon">🎤</span>
+                        <span id="voiceText">Nyomd meg és beszélj</span>
+                    </button>
+                    <button class="next-btn" id="nextBtnVoice" onclick="nextCard()" style="display: none;">Következő →</button>
+                </div>
+                <div class="voice-result" id="voiceResult"></div>
+                <div class="audio-playback" id="audioPlayback">
+                    <div class="playback-label">🔊 Hallgasd vissza a kiejtésed:</div>
+                    <audio id="audioPlayer" controls></audio>
+                </div>
+                <div class="result" id="result"></div>
+                <div class="voice-result" id="processingMsg" style="display: none; background: #fff3cd; border-color: #ffc107;">
+                    <strong>⏳ Feldolgozás...</strong> Értékelem a válaszod...
+                </div>
+            </div>
+            <div class="stats" id="stats">Mondat <span id="current">1</span> / <span id="total">50</span></div>
+        </div>
+        
+        <div class="completion" id="completion">
+            <h2>🎉 Gratulálok!</h2>
+            <div class="score" id="finalScore"></div>
+            <p style="font-size: 18px; color: #666; margin-bottom: 20px;">Helyes válaszok aránya</p>
+            <button class="restart-btn" onclick="restart()">Újrakezdés</button>
+        </div>
+    </div>
+
+    <script>
+        const sentences = [
+            {
+                hungarian: "5 éve él itt.",
+                english: "She has lived here for 5 years."
+            },
+            {
+                hungarian: "Tony és én soha nem találkoztunk azelőtt.",
+                english: "Tony and I have never met before."
+            },
+            {
+                hungarian: "Megcsináltad tegnap?",
+                english: "Did you do it yesterday?"
+            },
+            {
+                hungarian: "Jack 30 perce van itt.",
+                english: "Jack has been here for 30 minutes."
+            },
+            {
+                hungarian: "A gyerekeim nem csinálták meg a házi feladatukat.",
+                english: "My children haven't done their homework."
+            },
+            {
+                hungarian: "Néhány perce érkezett.",
+                english: "She arrived a few minutes ago."
+            },
+            {
+                hungarian: "Láttam Robot ma.",
+                english: "I have seen Rob today."
+            },
+            {
+                hungarian: "Sok pénzt költöttek múlt héten.",
+                english: "They spent a lot of money last week."
+            },
+            {
+                hungarian: "Hétfőn mentél oda?",
+                english: "Did you go there on Monday?"
+            },
+            {
+                hungarian: "A szomszédaim 2008 óta élnek itt.",
+                english: "My neighbours have lived here since 2008."
+            },
+            {
+                hungarian: "Találkoztál a bátyámmal?",
+                english: "Have you met my brother?"
+            },
+            {
+                hungarian: "Nem volt időm felhívni téged tegnap.",
+                english: "I didn't have time to call you yesterday."
+            },
+            {
+                hungarian: "9 óra óta van az irodában.",
+                english: "She has been in the office since 9am."
+            },
+            {
+                hungarian: "Láttad ezt a filmet?",
+                english: "Have you seen this movie?"
+            },
+            {
+                hungarian: "Valaki felhívott téged 10 perce.",
+                english: "Somebody called you 10 minutes ago."
+            },
+            {
+                hungarian: "Mikor történt?",
+                english: "When did it happen?"
+            },
+            {
+                hungarian: "Azt hiszem találkoztunk már.",
+                english: "I think we have met before."
+            },
+            {
+                hungarian: "Szombat óta vannak Rómában.",
+                english: "They have been in Rome since Saturday."
+            },
+            {
+                hungarian: "Nem főztem vacsorát.",
+                english: "I haven't made dinner."
+            },
+            {
+                hungarian: "5 éve házasodtunk össze.",
+                english: "We got married 5 years ago."
+            },
+            {
+                hungarian: "Tom megkapta az emailemet.",
+                english: "Tom has received my email."
+            },
+            {
+                hungarian: "Két angol órám volt tegnap.",
+                english: "I had two English lessons yesterday."
+            },
+            {
+                hungarian: "Bill Gates sok pénzt keresett idén.",
+                english: "Bill Gates has earned a lot of money this year."
+            },
+            {
+                hungarian: "John a General Motorsnál dolgozott három éve.",
+                english: "John worked for General Motors three years ago."
+            },
+            {
+                hungarian: "Valaki megette az összes sütit.",
+                english: "Somebody has eaten all the cookies."
+            },
+            {
+                hungarian: "Láttad ezt a filmet?",
+                english: "Have you seen this film?"
+            },
+            {
+                hungarian: "Jack tavaly levizsgázott nyelvből.",
+                english: "Jack took his language exam last year."
+            },
+            {
+                hungarian: "Mióta van ez az autód?",
+                english: "How long have you had this car?"
+            },
+            {
+                hungarian: "Soha nem voltam ott.",
+                english: "I have never been there."
+            },
+            {
+                hungarian: "Néhány napja eltörtem a lábam.",
+                english: "I broke my leg a few days ago."
+            },
+            {
+                hungarian: "Néhány perce elment.",
+                english: "She left a few minutes ago."
+            },
+            {
+                hungarian: "Hol voltál tegnap este?",
+                english: "Where were you last night?"
+            },
+            {
+                hungarian: "Nem vettem neked ajándékot. Sajnálom!",
+                english: "I haven't bought you a present. I'm sorry!"
+            },
+            {
+                hungarian: "Nem hívtak vissza.",
+                english: "They haven't called me back."
+            },
+            {
+                hungarian: "Valaki elvette a kabátomat. Nem találom!",
+                english: "Somebody has taken my coat. I can't find it!"
+            },
+            {
+                hungarian: "Miért mondtál fel múlt hónapban?",
+                english: "Why did you quit your job last month?"
+            },
+            {
+                hungarian: "Beszéltem vele tegnap.",
+                english: "I talked to her yesterday."
+            },
+            {
+                hungarian: "Bill autóbalesetet szenvedett. Mennünk kell!",
+                english: "Bill has been in a car crash. We have to go!"
+            },
+            {
+                hungarian: "Itt éltem, amikor gyerek voltam.",
+                english: "I lived here when I was a child."
+            },
+            {
+                hungarian: "Hallottad a híreket?",
+                english: "Have you heard the news?"
+            },
+            {
+                hungarian: "Elküldted az emailt?",
+                english: "Have you sent the email?"
+            },
+            {
+                hungarian: "Nem voltam ott tegnap.",
+                english: "I wasn't there yesterday."
+            },
+            {
+                hungarian: "Olvastad ezt a könyvet?",
+                english: "Have you read this book?"
+            },
+            {
+                hungarian: "Tom nem jött el a kirándulásra.",
+                english: "Tom didn't come for the trip."
+            },
+            {
+                hungarian: "Megvetted az autót?",
+                english: "Have you bought the car?"
+            },
+            {
+                hungarian: "Mióta ismered Alice-t?",
+                english: "How long have you known Alice?"
+            },
+            {
+                hungarian: "Nem dolgoztam tegnap.",
+                english: "I didn't work yesterday."
+            },
+            {
+                hungarian: "Lekéstük az utolsó buszt.",
+                english: "We have missed the last bus."
+            },
+            {
+                hungarian: "Becsukad az ablakot?",
+                english: "Have you closed the window?"
+            },
+            {
+                hungarian: "Megégettem a kezem tegnap.",
+                english: "I burnt my hand yesterday."
+            }
+        ];
+
+        let currentIndex = 0;
+        let correctCount = 0;
+        let currentMode = 'write';
+        let recognition = null;
+        let isListening = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedAudioURL = null;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('voiceResult').style.display = 'block';
+                document.getElementById('voiceResult').innerHTML = `<strong>Amit mondtál:</strong> "${transcript}"`;
+                
+                document.getElementById('processingMsg').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('processingMsg').style.display = 'none';
+                    checkVoiceAnswer(transcript);
+                }, 2500);
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Hangfelismerési hiba:', event.error);
+                document.getElementById('voiceResult').style.display = 'block';
+                document.getElementById('voiceResult').innerHTML = `<strong>Hiba:</strong> Nem sikerült felismerni. Próbáld újra!`;
+                stopListening();
+            };
+
+            recognition.onend = function() {
+                stopListening();
+            };
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (mode === 'write') {
+                document.getElementById('answerInput').style.display = 'block';
+                document.getElementById('writeButtons').style.display = 'flex';
+                document.getElementById('voiceButtons').style.display = 'none';
+            } else {
+                document.getElementById('answerInput').style.display = 'none';
+                document.getElementById('writeButtons').style.display = 'none';
+                document.getElementById('voiceButtons').style.display = 'flex';
+            }
+            
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('voiceResult').style.display = 'none';
+            document.getElementById('audioPlayback').style.display = 'none';
+            document.getElementById('processingMsg').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('nextBtnVoice').style.display = 'none';
+        }
+
+        function startListening() {
+            if (!recognition) {
+                alert('Sajnálom, a böngésződ nem támogatja a hangfelismerést. Próbáld meg Chrome böngészőben!');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    audioChunks = [];
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        recordedAudioURL = URL.createObjectURL(audioBlob);
+                        document.getElementById('audioPlayer').src = recordedAudioURL;
+                        document.getElementById('audioPlayback').style.display = 'block';
+                        
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.start();
+                    
+                    isListening = true;
+                    document.getElementById('voiceBtn').classList.add('listening');
+                    document.getElementById('voiceText').textContent = 'Hallgatlak...';
+                    document.getElementById('micIcon').textContent = '🔴';
+                    document.getElementById('voiceResult').style.display = 'none';
+                    document.getElementById('audioPlayback').style.display = 'none';
+                    
+                    recognition.start();
+                })
+                .catch(error => {
+                    console.error('Mikrofon hozzáférési hiba:', error);
+                    alert('Nem sikerült hozzáférni a mikrofonhoz. Engedélyezd a mikrofon használatát!');
+                });
+        }
+
+        function stopListening() {
+            isListening = false;
+            document.getElementById('voiceBtn').classList.remove('listening');
+            document.getElementById('voiceText').textContent = 'Nyomd meg és beszélj';
+            document.getElementById('micIcon').textContent = '🎤';
+            
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+            }
+        }
+
+        function checkVoiceAnswer(transcript) {
+            const correctAnswer = sentences[currentIndex].english;
+            const resultDiv = document.getElementById('result');
+            
+            const userNorm = normalize(transcript);
+            const correctNorm = normalize(correctAnswer);
+            
+            resultDiv.style.display = 'block';
+            document.getElementById('nextBtnVoice').style.display = 'block';
+            
+            if (userNorm === correctNorm) {
+                correctCount++;
+                resultDiv.className = 'result correct';
+                resultDiv.innerHTML = '<strong>✓ Helyes!</strong><div class="correct-answer">Remek kiejtés! 🎉</div>';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.innerHTML = `
+                    <strong>✗ Nem egészen...</strong>
+                    <div class="correct-answer">
+                        <strong>A helyes mondat:</strong><br>
+                        ${correctAnswer}
+                    </div>
+                `;
+            }
+        }
+
+        function normalize(str) {
+            return str.toLowerCase()
+                .trim()
+                .replace(/[.,!?;:]/g, '')
+                .replace(/\s+/g, ' ');
+        }
+
+        function loadCard() {
+            document.getElementById('hungarianText').textContent = sentences[currentIndex].hungarian;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('voiceResult').style.display = 'none';
+            document.getElementById('audioPlayback').style.display = 'none';
+            document.getElementById('processingMsg').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('nextBtnVoice').style.display = 'none';
+            document.getElementById('current').textContent = currentIndex + 1;
+            document.getElementById('total').textContent = sentences.length;
+            
+            if (recordedAudioURL) {
+                URL.revokeObjectURL(recordedAudioURL);
+                recordedAudioURL = null;
+            }
+            
+            const progress = ((currentIndex) / sentences.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answerInput').value;
+            const correctAnswer = sentences[currentIndex].english;
+            const resultDiv = document.getElementById('result');
+            
+            const userNorm = normalize(userAnswer);
+            const correctNorm = normalize(correctAnswer);
+            
+            resultDiv.style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'block';
+            
+            if (userNorm === correctNorm) {
+                correctCount++;
+                resultDiv.className = 'result correct';
+                resultDiv.innerHTML = '<strong>✓ Helyes!</strong><div class="correct-answer">Kitűnő munka! 🎉</div>';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.innerHTML = `
+                    <strong>✗ Nem egészen...</strong>
+                    <div class="correct-answer">
+                        <strong>A helyes mondat:</strong><br>
+                        ${correctAnswer}
+                    </div>
+                `;
+            }
+        }
+
+        function nextCard() {
+            currentIndex++;
+            if (currentIndex < sentences.length) {
+                loadCard();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            document.getElementById('cardContainer').style.display = 'none';
+            document.getElementById('completion').style.display = 'block';
+            
+            const percentage = Math.round((correctCount / sentences.length) * 100);
+            document.getElementById('finalScore').textContent = percentage + '%';
+            document.getElementById('progressFill').style.width = '100%';
+        }
+
+        function restart() {
+            currentIndex = 0;
+            correctCount = 0;
+            document.getElementById('cardContainer').style.display = 'block';
+            document.getElementById('completion').style.display = 'none';
+            loadCard();
+        }
+
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById('nextBtn').style.display === 'none') {
+                    checkAnswer();
+                } else {
+                    nextCard();
+                }
+            }
+        });
+
+        loadCard();
+    </script>
+</body>
+</html>
