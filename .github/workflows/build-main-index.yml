@@ -1,43 +1,113 @@
-name: Update auto-index (main menu)
+name: Build main index.html (GOANGOL)
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: [ main ]
 
-# FONTOS: ne fusson egyszerre több ilyen (különben push ütközés lesz)
+# Ne fusson egyszerre több generálás (különben összeakad a push)
 concurrency:
-  group: auto-index-main
+  group: goangol-build-main-index-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
-  build-auto-index:
+  build-main-index:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Build auto-index.html from flashcards
+      - name: Generate index.html + auto-index.html (classic style, clickable links)
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
           FLASHDIR="flashcards"
-          OUT="auto-index.html"
-
           mkdir -p "$FLASHDIR"
 
-          # Összegyűjtjük a flashcards html fájlokat
-          mapfile -t files < <(find "$FLASHDIR" -maxdepth 1 -type f -name "*.html" -printf "%f\n" | sort -f)
+          # ---- helpers ----
+         file_title () {
+            # input: filename without path, with .html
+            local f="$1"
+            local b="${f%.html}"
 
-          # --- HTML fej ---
-          cat > "$OUT" << 'HTML'
-          <!doctype html>
+            case "$b" in
+              phrasal_verbs_alapfok_*_flashcards)
+                # pl: phrasal_verbs_alapfok_15_flashcards -> Alapfok 15
+                echo "$b" | sed -E 's/^phrasal_verbs_alapfok_([0-9]+)_flashcards$/Alapfok \1/'
+                ;;
+              phrasal_verbs_flashcards)
+                echo "Alapfok (Phrasal Verbs)"
+                ;;
+              expressions_alapfok_*_flashcards)
+                echo "$b" | sed -E 's/^expressions_alapfok_([0-9]+)_flashcards$/Expressions – Alapfok \1/'
+                ;;
+              expressions_*_flashcards)
+                # pl: expressions_19_flashcards -> Expressions – 19
+                echo "$b" | sed -E 's/^expressions_([0-9]+)_flashcards$/Expressions – \1/'
+                ;;
+              kifejezesek_alapfok_*_flashcards)
+                echo "$b" | sed -E 's/^kifejezesek_alapfok_([0-9]+)_flashcards$/Kifejezések – Alapfok \1/'
+                ;;
+              present_perfect_flashcards)
+                echo "Present Perfect"
+                ;;
+              megszamlalhato_megszamlalhatatlan_alapfok)
+                echo "Megszámlálható / megszámlálhatatlan"
+                ;;
+              golife_elektromos_kutyu_flashcards)
+                echo "GoLife – elektromos kütyü"
+                ;;
+              *)
+                # általános fallback: underscore -> space, felesleges "flashcards" levágása
+                echo "$b" | sed -E 's/_/ /g; s/\bflashcards\b//g; s/[[:space:]]+/ /g; s/^ //; s/ $//'
+                ;;
+            esac
+          }
+
+         # Gyűjtés (csak a flashcards mappából)
+          mapfile -t FILES < <(find "$FLASHDIR" -maxdepth 1 -type f -name "*.html" \
+            ! -name "auto-index.html" ! -name "index.html" | sed "s|^$FLASHDIR/||" | sort)
+
+          # kategóriák listái (HTML <li> sorok)
+          PV=""
+          EX=""
+          NY=""
+          SZ=""
+
+          for f in "${FILES[@]}"; do
+            t="$(file_title "$f")"
+            href="$FLASHDIR/$f"
+
+            li="<li><a href=\"$href\">$t<span class=\"sub\">Flashcards</span></a></li>"
+
+            case "$f" in
+              phrasal_verbs*)
+                PV+="$li"$'\n'
+                ;;
+              expressions*|kifejezesek*)
+                EX+="$li"$'\n'
+                ;;
+              present_perfect*|megszamlalhato*)
+                NY+="$li"$'\n'
+                ;;
+              golife*)
+                SZ+="$li"$'\n'
+                ;;
+              *)
+                # ha később lesz “egyéb”, tehetjük ide is, de most a Szituációkba dobjuk
+                SZ+="$li"$'\n'
+                ;;
+            esac
+          done
+
+          # ---- MAIN index.html (régi, “klasszikus” stílus) ----
+          cat > index.html <<'HTML'
+          <!DOCTYPE html>
           <html lang="hu">
           <head>
             <meta charset="UTF-8" />
@@ -56,319 +126,294 @@ jobs:
                 justify-content:center;
               }
               .wrap{width:min(980px,100%)}
-              header{text-align:center;color:#fff;margin-bottom:14px}
-              header h1{margin:0 0 6px;font-size:clamp(26px,3.2vw,38px);letter-spacing:.2px}
-              header p{margin:0;opacity:.92;font-weight:700}
-
+              .header{
+                text-align:center;
+                color:#fff;
+                margin-bottom: 18px;
+              }
+              .header h1{
+                margin:0 0 8px;
+                font-size: clamp(26px, 3.2vw, 38px);
+                letter-spacing:.2px;
+              }
+              .header p{
+                margin:0;
+                opacity:.92;
+                font-weight: 700;
+              }
               .topbar{
-                display:flex;flex-wrap:wrap;gap:10px;
-                justify-content:center;align-items:center;
+                display:flex;
+                justify-content:center;
+                gap:10px;
                 margin: 14px 0 18px;
+                flex-wrap:wrap;
               }
-              .search{
-                width:min(520px,100%);
-                display:flex;align-items:center;gap:8px;
+              .btn{
+                display:inline-flex;
+                align-items:center;
+                gap:8px;
+                padding:10px 14px;
+                border-radius: 12px;
                 background: rgba(255,255,255,.92);
-                border-radius:14px;
-                padding:10px 12px;
-                box-shadow: 0 8px 24px rgba(0,0,0,.16);
+                color:#203055;
+                text-decoration:none;
+                font-weight: 900;
+                box-shadow: 0 10px 25px rgba(0,0,0,.18);
+                border: 1px solid rgba(255,255,255,.45);
               }
-              .search input{
-                width:100%;
-                border:none;outline:none;
-                background:transparent;
-                font-size:14px;
-              }
-              .chipbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-              .chip{
-                border:none;cursor:pointer;
-                padding:9px 12px;border-radius:999px;
-                background: rgba(255,255,255,.92);
-                font-weight:800;
-                box-shadow: 0 8px 24px rgba(0,0,0,.12);
-                transition: transform .15s ease, box-shadow .15s ease;
-              }
-              .chip:hover{transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,0,0,.18)}
-              .chip.active{outline: 2px solid rgba(255,255,255,.85)}
-
+              .btn:hover{transform: translateY(-1px)}
               .grid{
                 display:grid;
-                grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-                gap: 16px;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 14px;
+                margin-top: 8px;
               }
-
-              .cat{
-                background: rgba(255,255,255,.94);
-                border-radius: 18px;
-                padding: 14px 14px 12px;
-                box-shadow: 0 10px 30px rgba(0,0,0,.18);
-                border-top: 5px solid rgba(0,0,0,.08);
-                transition: transform .18s ease, box-shadow .18s ease;
+              .card{
+                background: rgba(255,255,255,.98);
+                border-radius: 16px;
+                box-shadow: 0 18px 45px rgba(0,0,0,.22);
+                padding: 16px 16px 10px;
+                border: 1px solid rgba(255,255,255,.35);
               }
-              .cat:hover{transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,.22)}
-              .catHeader{
-                display:flex;align-items:center;justify-content:space-between;gap:10px;
-                margin-bottom:10px;
+              .card h2{
+                margin: 2px 0 10px;
+                font-size: 18px;
+                color:#355cff;
+                display:flex;
+                align-items:center;
+                gap:8px;
               }
-              .catTitle{
-                display:flex;align-items:center;gap:10px;
-                font-weight:900;
+              ul{list-style:none; padding:0; margin:0}
+              li{margin: 10px 0}
+              a.lesson{
+                display:block;
+                text-decoration:none;
+                color:#1f2a44;
+                font-weight: 800;
+                padding: 10px 12px;
+                border-radius: 12px;
+                border: 1px solid rgba(31,42,68,.12);
+                background: rgba(79,107,255,.06);
+                transition: transform .08s ease, background .15s ease;
               }
-              .icon{
-                width:28px;height:28px;border-radius:10px;
-                display:grid;place-items:center;
-                color:#fff;font-weight:900;
+              a.lesson:hover{
+                transform: translateY(-1px);
+                background: rgba(79,107,255,.12);
               }
-              .badgeNew{
-                font-size:12px;
-                font-weight:900;
-                padding:4px 8px;
-                border-radius:999px;
-                background:#ffdc5e;
-                color:#1b1b1b;
+              .sub{
+                display:block;
+                margin-top: 4px;
+                font-size: 12px;
+                font-weight: 800;
+                color: rgba(31,42,68,.65);
               }
-
-              .lessonList{display:flex;flex-direction:column;gap:10px}
-              .lesson{
-                display:flex;justify-content:space-between;align-items:center;gap:10px;
-                background:#f3f6ff;
-                border-radius:14px;
-                padding:10px 12px;
-                border: 1px solid rgba(0,0,0,.06);
-                transition: transform .15s ease;
-              }
-              .lesson:hover{transform: translateY(-1px)}
-              .lesson a{
-                text-decoration:none;color:#1f2a44;font-weight:900;
-                display:block;flex:1;
-              }
-              .pill{
-                font-size:12px;
-                background: rgba(0,0,0,.06);
-                padding:6px 10px;border-radius:999px;
-                font-weight:800;
-              }
-
-              .footerTip{
+              .footer{
                 text-align:center;
                 color: rgba(255,255,255,.9);
-                margin-top: 18px;
-                font-weight:800;
-                font-size: 13px;
-              }
-
-              @media (max-width:520px){
-                .lesson{align-items:flex-start;flex-direction:column}
-                .pill{align-self:flex-start}
+                font-weight: 700;
+                margin-top: 16px;
+                font-size: 12px;
               }
             </style>
           </head>
           <body>
             <div class="wrap">
-              <header>
+              <div class="header">
                 <h1>📚 GOANGOL – Főmenü</h1>
                 <p>Válassz leckét (Flashcards)</p>
-              </header>
-
-              <div class="topbar">
-                <div class="search" title="Keresés címben és fájlnévben">
-                  🔎 <input id="q" type="text" placeholder="Keresés… (pl. phrasal, present, kifejezések)" />
-                </div>
-                <div class="chipbar">
-                  <button class="chip active" data-sort="az">ABC</button>
-                  <button class="chip" data-sort="new">Újak elöl</button>
-                </div>
               </div>
 
-              <div id="grid" class="grid"></div>
+              <div class="topbar">
+                <a class="btn" href="auto-index.html">📋 Automatikus lecke lista</a>
+              </div>
 
-              <div class="footerTip">
+              <div class="grid">
+                <section class="card">
+                  <h2>⚡ Phrasal Verbs</h2>
+                  <ul>
+          HTML
+
+          # Beillesztjük a kategóriákat, és a linkek kapják a "lesson" class-t
+          # (a klasszikus stílus miatt)
+          echo "$PV" | sed 's/<a href="/<a class="lesson" href="/g' >> index.html
+
+          cat >> index.html <<'HTML'
+                  </ul>
+                </section>
+
+                <section class="card">
+                  <h2>🧩 Expressions / Kifejezések</h2>
+                  <ul>
+          HTML
+
+          echo "$EX" | sed 's/<a href="/<a class="lesson" href="/g' >> index.html
+
+          cat >> index.html <<'HTML'
+                  </ul>
+                </section>
+
+                <section class="card">
+                  <h2>📘 Nyelvtan</h2>
+                  <ul>
+          HTML
+
+          echo "$NY" | sed 's/<a href="/<a class="lesson" href="/g' >> index.html
+
+          cat >> index.html <<'HTML'
+                  </ul>
+                </section>
+
+                <section class="card">
+                  <h2>🛒 Szituációk</h2>
+                  <ul>
+          HTML
+
+          echo "$SZ" | sed 's/<a href="/<a class="lesson" href="/g' >> index.html
+
+          cat >> index.html <<'HTML'
+                  </ul>
+                </section>
+              </div>
+
+              <div class="footer">
                 Tipp: ha új leckét teszel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.
               </div>
             </div>
-
-            <script>
-              // --- Kategória felismerés + ikon + szín ---
-              function detectCategory(name){
-                const n = name.toLowerCase();
-                if(n.includes("phrasal")) return {key:"phrasal", title:"Phrasal Verbs", icon:"⚡", color:"#ff7a00"};
-                if(n.includes("expression") || n.includes("kifejezes")) return {key:"expressions", title:"Expressions / Kifejezések", icon:"🧩", color:"#2dd4bf"};
-                if(n.includes("present") || n.includes("nyelvtan") || n.includes("megszam") ) return {key:"grammar", title:"Nyelvtan", icon:"📘", color:"#60a5fa"};
-                if(n.includes("szitu")) return {key:"situations", title:"Szituációk", icon:"🛒", color:"#f472b6"};
-                return {key:"other", title:"Egyéb", icon:"📌", color:"#a78bfa"};
-              }
-
-              // "ÚJ" szabály: ha a fájlnévben van "uj" / "new" vagy a legutóbbi 3 elem között van (egyszerű, stabil)
-              function isNew(name, index, total){
-                const n = name.toLowerCase();
-                if(n.includes("_uj") || n.includes("uj_") || n.includes("new")) return true;
-                // utolsó 3 elem "új"
-                return index >= Math.max(0, total - 3);
-              }
-
-              // YAML generálja ide az adatokat:
-              const LESSONS = [];
-            </script>
-          HTML
-
-          # --- JS adatok beírása ---
-          {
-            echo "<script>"
-            echo "LESSONS.push(...["
-            total=${#files[@]}
-            i=0
-            for f in "${files[@]}"; do
-              i=$((i+1))
-              # Cím: fájlnévből
-              title="${f%.html}"
-              title="${title//_/ }"
-              # egyszerű 'new' jelölés
-              # (az indexet a böngésző oldali isNew() kezeli, itt csak átadjuk sorszámot/összeset)
-              echo "  { file: \"flashcards/$f\", name: \"$title\", raw: \"$f\", idx: $((i-1)), total: $total },"
-            done
-            echo "]);"
-            echo "</script>"
-          } >> "$OUT"
-
-          # --- HTML vége (render + kereső + rendezés) ---
-          cat >> "$OUT" << 'HTML'
-          <script>
-            const grid = document.getElementById("grid");
-            const q = document.getElementById("q");
-            const chips = document.querySelectorAll(".chip");
-
-            let sortMode = "az";
-
-            function norm(s){
-              return (s||"")
-                .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-            }
-
-            function render(){
-              const query = norm(q.value.trim());
-
-              let items = LESSONS.slice();
-
-              // szűrés
-              if(query){
-                items = items.filter(x => norm(x.name).includes(query) || norm(x.raw).includes(query));
-              }
-
-              // alap rendezés
-              items.sort((a,b) => norm(a.name).localeCompare(norm(b.name), "hu"));
-
-              // Újak elöl (a végéről hoz előre)
-              if(sortMode === "new"){
-                items.sort((a,b) => (isNew(b.raw,b.idx,b.total) - isNew(a.raw,a.idx,a.total)) || norm(a.name).localeCompare(norm(b.name), "hu"));
-              }
-
-              // kategóriákba csoport
-              const groups = new Map();
-              for(const it of items){
-                const cat = detectCategory(it.raw);
-                if(!groups.has(cat.key)) groups.set(cat.key, { ...cat, lessons: [] });
-                groups.get(cat.key).lessons.push(it);
-              }
-
-              // kategória sorrend
-              const order = ["phrasal","expressions","grammar","situations","other"];
-              const cats = Array.from(groups.values()).sort((a,b)=> order.indexOf(a.key) - order.indexOf(b.key));
-
-              grid.innerHTML = "";
-              for(const cat of cats){
-                const newCount = cat.lessons.filter((x)=>isNew(x.raw,x.idx,x.total)).length;
-
-                const card = document.createElement("div");
-                card.className = "cat";
-                card.style.borderTopColor = cat.color;
-
-                const header = document.createElement("div");
-                header.className = "catHeader";
-
-                const left = document.createElement("div");
-                left.className = "catTitle";
-
-                const ic = document.createElement("div");
-                ic.className = "icon";
-                ic.style.background = cat.color;
-                ic.textContent = cat.icon;
-
-                const ttl = document.createElement("div");
-                ttl.textContent = cat.title;
-
-                left.appendChild(ic);
-                left.appendChild(ttl);
-
-                header.appendChild(left);
-
-                if(newCount > 0){
-                  const b = document.createElement("div");
-                  b.className = "badgeNew";
-                  b.textContent = `ÚJ ${newCount}`;
-                  header.appendChild(b);
-                }
-
-                const list = document.createElement("div");
-                list.className = "lessonList";
-
-                for(const l of cat.lessons){
-                  const row = document.createElement("div");
-                  row.className = "lesson";
-
-                  const a = document.createElement("a");
-                  a.href = l.file;
-                  a.textContent = l.name;
-
-                  const pill = document.createElement("div");
-                  pill.className = "pill";
-                  pill.textContent = "Flashcards";
-
-                  row.appendChild(a);
-                  row.appendChild(pill);
-                  list.appendChild(row);
-                }
-
-                card.appendChild(header);
-                card.appendChild(list);
-                grid.appendChild(card);
-              }
-            }
-
-            chips.forEach(btn=>{
-              btn.addEventListener("click", ()=>{
-                chips.forEach(x=>x.classList.remove("active"));
-                btn.classList.add("active");
-                sortMode = btn.dataset.sort;
-                render();
-              });
-            });
-
-            q.addEventListener("input", render);
-            render();
-          </script>
-
           </body>
           </html>
           HTML
 
-      - name: Commit and push (safe)
+          # ---- auto-index.html (egyszerű lista) ----
+          cat > auto-index.html <<'HTML'
+          <!DOCTYPE html>
+          <html lang="hu">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>GOANGOL – Automatikus lecke lista</title>
+            <style>
+              body{
+                margin:0;
+                font-family: Arial, sans-serif;
+                background: linear-gradient(135deg,#667eea,#764ba2);
+                color:#111;
+              }
+              .wrap{
+                max-width: 980px;
+                margin: 0 auto;
+                padding: 28px 18px 40px;
+              }
+              .title{
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                gap:12px;
+                color:#fff;
+                font-weight: 900;
+                font-size: 34px;
+                margin: 10px 0 6px;
+              }
+              .subtitle{
+                text-align:center;
+                color: rgba(255,255,255,0.9);
+                margin: 0 0 20px;
+                font-weight: 800;
+              }
+              .bar{
+                display:flex;
+                justify-content:center;
+                gap: 10px;
+                margin: 14px 0 22px;
+                flex-wrap: wrap;
+              }
+              .btn{
+                background: rgba(255,255,255,0.9);
+                border: 0;
+                border-radius: 12px;
+                padding: 10px 14px;
+                cursor: pointer;
+                text-decoration: none;
+                color:#222;
+                font-weight: 800;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+              }
+              .card{
+                background: rgba(255,255,255,0.92);
+                border-radius: 18px;
+                padding: 18px;
+                box-shadow: 0 18px 45px rgba(0,0,0,.22);
+                border: 1px solid rgba(255,255,255,.35);
+              }
+              .card h2{
+                margin: 0 0 12px;
+                color:#203055;
+                font-size: 18px;
+              }
+              .row{
+                display:block;
+                padding: 12px 12px;
+                border-radius: 12px;
+                background: rgba(0,0,0,0.05);
+                margin: 10px 0;
+                text-decoration:none;
+                color:#111;
+                font-weight: 900;
+              }
+              .row:hover{background: rgba(0,0,0,0.08)}
+              .foot{
+                text-align:center;
+                color: rgba(255,255,255,0.9);
+                margin-top: 14px;
+                font-weight: 800;
+                font-size: 12px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <div class="title">📚 GOANGOL – Automatikus lecke lista</div>
+              <div class="subtitle">Ezt az oldalt a GitHub Actions generálja a repo-ban lévő flashcard HTML-ekből.</div>
+
+              <div class="bar">
+                <a class="btn" href="index.html">⬅️ Vissza a főmenübe</a>
+                <a class="btn" href="auto-index.html">🔄 Frissítés (újratöltés)</a>
+              </div>
+
+              <div class="card">
+                <h2>⚡ Összes lecke</h2>
+          HTML
+
+          for f in "${FILES[@]}"; do
+            t="$(file_title "$f")"
+            echo "<a class=\"row\" href=\"$FLASHDIR/$f\">$t</a>" >> auto-index.html
+          done
+
+          cat >> auto-index.html <<'HTML'
+              </div>
+
+              <div class="foot">Tipp: ha új leckét teszel fel, elég commitolni — az oldal automatikusan frissül.</div>
+            </div>
+          </body>
+          </html>
+          HTML
+
+      - name: Commit and push generated files
         shell: bash
         run: |
-          set -e
-
-          # ha nincs változás, ne pusholjon
-          if git diff --quiet; then
-            echo "No changes."
-            exit 0
-          fi
-
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add auto-index.html
-          git commit -m "Update auto-index.html [skip ci]" || true
+          git add index.html auto-index.html
 
-          # biztosítás: frissítsünk és próbáljuk újra
-          git pull --rebase origin main || true
-          git push origin HEAD:main
+          # Ha nincs változás, ne commitoljunk
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Auto-generate index.html + auto-index.html [skip ci]"
+
+          # Rebase + push (hogy ne legyen non-fast-forward)
+          git pull --rebase origin main
+          git push
