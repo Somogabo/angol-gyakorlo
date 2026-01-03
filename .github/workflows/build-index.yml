@@ -1,0 +1,17 @@
+name: Build index.html
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build index.html from flashcards
+        run: |
+          echo "Index build placeholder – később ide jön az automatika"
