@@ -1,0 +1,107 @@
+name: Build main index.html (GOANGOL)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "flashcards/**"
+      - ".github/workflows/build-main-index.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-main-index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate index.html from flashcards
+        shell: bash
+        run: |
+          set -e
+
+          # Gyűjtsük össze a flashcards/*.html fájlokat (név szerint)
+          mapfile -t FILES < <(find flashcards -maxdepth 1 -type f -name "*.html" -printf "%f\n" | sort)
+
+          # Ha nincs semmi, akkor is generáljunk egy alap indexet
+          {
+            echo '<!DOCTYPE html>'
+            echo '<html lang="hu">'
+            echo '<head>'
+            echo '  <meta charset="UTF-8" />'
+            echo '  <meta name="viewport" content="width=device-width, initial-scale=1.0" />'
+            echo '  <title>GOANGOL – Főmenü</title>'
+            echo '  <style>'
+            echo '    *{box-sizing:border-box}'
+            echo '    body{margin:0;font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(135deg,#667eea,#764ba2);padding:28px 18px;color:#1f2a44;display:flex;justify-content:center}'
+            echo '    .wrap{width:min(980px,100%)}'
+            echo '    .header{text-align:center;color:#fff;margin-bottom:18px}'
+            echo '    .header h1{margin:0 0 8px;font-size:clamp(26px,3.2vw,38px);letter-spacing:2px}'
+            echo '    .header p{margin:0;opacity:.92;font-weight:700}'
+            echo '    .topbar{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0 20px}'
+            echo '    .btn{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.45);padding:10px 14px;border-radius:12px;color:#1f2a44;text-decoration:none;font-weight:800;box-shadow:0 14px 38px rgba(0,0,0,.18)}'
+            echo '    .btn:hover{transform:translateY(-1px)}'
+            echo '    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}'
+            echo '    .card{background:rgba(255,255,255,.98);border-radius:16px;box-shadow:0 18px 45px rgba(0,0,0,.22);padding:16px 16px 10px;border:1px solid rgba(255,255,255,.35)}'
+            echo '    .card h2{margin:2px 0 10px;font-size:18px;color:#355cff}'
+            echo '    .list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}'
+            echo '    .item{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f3f5ff;border:1px solid #e3e7ff;padding:12px 12px;border-radius:12px;text-decoration:none;color:#1f2a44;font-weight:800}'
+            echo '    .item:hover{background:#edf0ff}'
+            echo '    .pill{font-size:12px;font-weight:900;background:#fff;border:1px solid #dfe5ff;padding:6px 10px;border-radius:999px;opacity:.9}'
+            echo '    .hint{color:rgba(255,255,255,.9);text-align:center;margin-top:14px;font-weight:700;font-size:12px}'
+            echo '  </style>'
+            echo '</head>'
+            echo '<body>'
+            echo '  <div class="wrap">'
+            echo '    <div class="header">'
+            echo '      <h1>📚 GOANGOL – Főmenü</h1>'
+            echo '      <p>Válassz leckét (Flashcards)</p>'
+            echo '    </div>'
+            echo '    <div class="topbar">'
+            echo '      <a class="btn" href="./auto-index.html">📋 Automatikus leckelista</a>'
+            echo '      <a class="btn" href="./index.html">🔄 Frissítés (újratöltés)</a>'
+            echo '    </div>'
+            echo '    <div class="grid">'
+            echo '      <div class="card">'
+            echo '        <h2>⚡ Összes lecke</h2>'
+            echo '        <ul class="list">'
+
+            if [ "${#FILES[@]}" -eq 0 ]; then
+              echo '          <li><span class="item">Még nincs lecke a flashcards mappában<span class="pill">Flashcards</span></span></li>'
+            else
+              for f in "${FILES[@]}"; do
+                base="${f%.html}"
+                title="$(echo "$base" | sed -E 's/[_-]+/ /g' | sed -E 's/ +/ /g' | sed -E 's/\b(.)/\U\1/g')"
+                echo "          <li><a class=\"item\" href=\"./flashcards/$f\"><span>$title</span><span class=\"pill\">Flashcards</span></a></li>"
+              done
+            fi
+
+            echo '        </ul>'
+            echo '      </div>'
+            echo '    </div>'
+            echo '    <div class="hint">Tipp: új lecke feltöltés után elég commitolni — a főmenü automatikusan frissül.</div>'
+            echo '  </div>'
+            echo '</body>'
+            echo '</html>'
+          } > index.html
+
+      - name: Commit and push index.html
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Csak akkor commitoljuk, ha tényleg változott
+          if git diff --quiet -- index.html; then
+            echo "No changes in index.html"
+            exit 0
+          fi
+
+          git add index.html
+          git commit -m "Auto-generate main index.html"
+          git push
