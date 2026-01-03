@@ -2,214 +2,114 @@ name: Build main index.html (GOANGOL)
 
 on:
   push:
-    branches: ["main"]
-    # Fontos: így nem lesz végtelen loop (mert az index.html commit nem triggereli újra)
-    paths:
-      - "flashcards/**.html"
-      - ".github/workflows/build-main-index.yml"
-
-permissions:
-  contents: write
+    branches:
+      - main
 
 jobs:
   build-main-index:
-    # Ne fusson le újra a bot commitjára
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate index.html (main menu)
+      - name: Generate index.html automatically
         shell: bash
         run: |
           set -e
-          shopt -s nullglob
 
-          # Listázzuk a flashcard HTML-eket a flashcards mappából
-          mapfile -t FILES < <(ls -1 flashcards/*.html 2>/dev/null | sed 's|^flashcards/||' | sort -f)
+          FILES=$(ls flashcards/*.html 2>/dev/null || true)
 
-          # "szép" cím a fájlnévből
-          pretty_title() {
-            local s="$1"
-            s="${s%.html}"
-            s="${s//_/ }"
-            # dupla szóközök kiszűrése
-            s="$(echo "$s" | sed -E 's/[[:space:]]+/ /g')"
-            echo "$s"
-          }
+          echo '<!DOCTYPE html>' > index.html
+          echo '<html lang="hu">' >> index.html
+          echo '<head>' >> index.html
+          echo '  <meta charset="UTF-8" />' >> index.html
+          echo '  <meta name="viewport" content="width=device-width, initial-scale=1.0" />' >> index.html
+          echo '  <title>GOANGOL – Főmenü</title>' >> index.html
 
-          # kategorizálás fájlnév alapján (később könnyen finomítható)
-          phrasal=()
-          expressions=()
-          grammar=()
-          situations=()
+          echo '  <style>' >> index.html
+          echo '  *{box-sizing:border-box}' >> index.html
+          echo '  body{' >> index.html
+          echo '    margin:0;' >> index.html
+          echo '    font-family:Arial, sans-serif;' >> index.html
+          echo '    min-height:100vh;' >> index.html
+          echo '    background:linear-gradient(135deg,#667eea,#764ba2);' >> index.html
+          echo '    padding:28px 18px;' >> index.html
+          echo '    color:#1f2a44;' >> index.html
+          echo '    display:flex;' >> index.html
+          echo '    justify-content:center;' >> index.html
+          echo '  }' >> index.html
 
-          for f in "${FILES[@]}"; do
-            low="$(echo "$f" | tr '[:upper:]' '[:lower:]')"
-            if [[ "$low" == *"phrasal"* ]]; then
-              phrasal+=("$f")
-            elif [[ "$low" == *"expressions"* || "$low" == *"kifejezes"* ]]; then
-              expressions+=("$f")
-            elif [[ "$low" == *"present perfect"* || "$low" == *"megszamlalhato"* || "$low" == *"nyelvtan"* ]]; then
-              grammar+=("$f")
-            else
-              situations+=("$f")
+          echo '  .wrap{width:min(980px,100%)}' >> index.html
+          echo '  header{text-align:center;color:#fff;margin-bottom:18px}' >> index.html
+          echo '  header h1{margin:0 0 6px;font-size:clamp(26px,3.2vw,38px)}' >> index.html
+          echo '  header p{margin:0;opacity:.9;font-weight:600}' >> index.html
+
+          echo '  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}' >> index.html
+          echo '  .card{background:rgba(255,255,255,.97);border-radius:16px;padding:14px;box-shadow:0 18px 45px rgba(0,0,0,.22)}' >> index.html
+          echo '  .card h2{margin:4px 6px 10px;font-size:18px;color:#355cff}' >> index.html
+
+          echo '  ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}' >> index.html
+
+          echo '  .lesson{' >> index.html
+          echo '    display:flex;' >> index.html
+          echo '    justify-content:space-between;' >> index.html
+          echo '    align-items:center;' >> index.html
+          echo '    width:100%;' >> index.html
+          echo '    padding:12px 14px;' >> index.html
+          echo '    border-radius:12px;' >> index.html
+          echo '    background:#f3f6ff;' >> index.html
+          echo '    text-decoration:none;' >> index.html
+          echo '    color:inherit;' >> index.html
+          echo '    transition:.15s;' >> index.html
+          echo '  }' >> index.html
+
+          echo '  .lesson:hover{background:#e9eeff;transform:translateY(-1px)}' >> index.html
+          echo '  .tag{font-size:12px;padding:3px 8px;border-radius:999px;background:#dbe4ff;color:#1f3cff;font-weight:700}' >> index.html
+
+          echo '  .hint{text-align:center;color:#fff;opacity:.85;margin-top:18px;font-size:13px}' >> index.html
+          echo '  </style>' >> index.html
+          echo '</head>' >> index.html
+          echo '<body>' >> index.html
+
+          echo '<div class="wrap">' >> index.html
+          echo '<header>' >> index.html
+          echo '<h1>📚 GOANGOL – Főmenü</h1>' >> index.html
+          echo '<p>Válassz leckét (Flashcards)</p>' >> index.html
+          echo '</header>' >> index.html
+
+          echo '<div class="grid">' >> index.html
+
+          declare -a phrasal expressions grammar situations
+
+          for f in $FILES; do
+            name=$(basename "$f")
+            lname=$(echo "$name" | tr '[:upper:]' '[:lower:]')
+            if [[ $lname == *phrasal* ]]; then phrasal+=("$name")
+            elif [[ $lname == *express* || $lname == *kifejezes* ]]; then expressions+=("$name")
+            elif [[ $lname == *perfect* || $lname == *megszamlal* ]]; then grammar+=("$name")
+            else situations+=("$name")
             fi
           done
 
-          # HTML eleje + stílus (a mostani GOANGOL dizájnhoz hasonló)
-          cat > index.html <<'HTML'
-          <!DOCTYPE html>
-          <html lang="hu">
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>GOANGOL – Főmenü</title>
-            <style>
-              *{box-sizing:border-box}
-              body{
-                margin:0;
-                font-family: Arial, sans-serif;
-                min-height:100vh;
-                background: linear-gradient(135deg,#667eea,#764ba2);
-                padding: 28px 18px;
-                color:#1f2a44;
-                display:flex;
-                justify-content:center;
-              }
-              .wrap{width:min(980px,100%)}
-              .header{
-                text-align:center;
-                color:#fff;
-                margin-bottom:18px;
-              }
-              .header h1{
-                margin:0 0 8px;
-                font-size: clamp(26px, 3.2vw, 38px);
-                letter-spacing:.2px;
-              }
-              .header p{
-                margin:0;
-                opacity:.92;
-                font-weight:700;
-              }
-              .topbar{
-                display:flex;
-                justify-content:center;
-                gap:10px;
-                margin: 14px 0 18px;
-                flex-wrap:wrap;
-              }
-              .btn{
-                display:inline-flex;
-                align-items:center;
-                gap:8px;
-                border:0;
-                border-radius:12px;
-                padding:10px 14px;
-                background: rgba(255,255,255,.92);
-                color:#24324a;
-                text-decoration:none;
-                font-weight:800;
-                box-shadow: 0 10px 30px rgba(0,0,0,.18);
-              }
-              .btn:hover{transform: translateY(-1px)}
-              .grid{
-                display:grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap:14px;
-                margin-top:18px;
-              }
-              .card{
-                background: rgba(255,255,255,.98);
-                border-radius:16px;
-                box-shadow: 0 18px 45px rgba(0,0,0,.22);
-                padding:16px 16px 10px;
-                border: 1px solid rgba(255,255,255,.35);
-              }
-              .card h2{
-                margin:2px 0 10px;
-                font-size:18px;
-                color:#355cff;
-                display:flex;
-                align-items:center;
-                gap:8px;
-              }
-              ul{list-style:none;padding:0;margin:0}
-              li{
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:10px;
-                background:#f1f4ff;
-                border:1px solid rgba(0,0,0,.06);
-                padding:10px 10px;
-                border-radius:12px;
-                margin-bottom:10px;
-              }
-              a.lesson{
-                color:#111827;
-                text-decoration:none;
-                font-weight:800;
-              }
-              a.lesson:hover{text-decoration:underline}
-              .tag{
-                font-size:12px;
-                font-weight:800;
-                color:#5b6375;
-                background:#ffffffa8;
-                border:1px solid rgba(0,0,0,.06);
-                padding:6px 10px;
-                border-radius:999px;
-              }
-              .hint{
-                text-align:center;
-                margin-top:16px;
-                color:rgba(255,255,255,.9);
-                font-weight:700;
-                font-size:12px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="wrap">
-              <div class="header">
-                <h1>📚 GOANGOL – Főmenü</h1>
-                <p>Válassz leckét (Flashcards)</p>
-              </div>
+          pretty_title () {
+            echo "$1" | sed -E 's/\.html$//;s/_/ /g;s/ +/ /g;s/\b\w/\U&/g'
+          }
 
-              <div class="topbar">
-                <a class="btn" href="auto-index.html">📋 Automatikus leckelista</a>
-                <a class="btn" href="index.html" onclick="location.reload(); return false;">🔄 Frissítés (újratöltés)</a>
-              </div>
-
-              <div class="grid">
-          HTML
-
-          # Segédfüggvény: kártya kiírása
-          render_card() {
+          render_card () {
             local title="$1"
             shift
-            local -a arr=("$@")
+            local arr=("$@")
+            [ "${#arr[@]}" -eq 0 ] && return 0
 
-            # üres kategóriát ne írjunk ki
-            if [ "${#arr[@]}" -eq 0 ]; then
-              return 0
-            fi
-
-            echo "  <div class=\"card\">" >> index.html
-            echo "    <h2>${title}</h2>" >> index.html
-            echo "    <ul>" >> index.html
-
+            echo '<div class="card">' >> index.html
+            echo "<h2>$title</h2>" >> index.html
+            echo '<ul>' >> index.html
             for f in "${arr[@]}"; do
-              t="$(pretty_title "$f")"
-              echo "      <li><a class=\"lesson\" href=\"flashcards/${f}\">${t}</a><span class=\"tag\">Flashcards</span></li>" >> index.html
+              t=$(pretty_title "$f")
+              echo "<li><a class=\"lesson\" href=\"flashcards/$f\"><span>$t</span><span class=\"tag\">Flashcards</span></a></li>" >> index.html
             done
-
-            echo "    </ul>" >> index.html
-            echo "  </div>" >> index.html
+            echo '</ul></div>' >> index.html
           }
 
           render_card "⚡ Phrasal Verbs" "${phrasal[@]}"
@@ -217,17 +117,10 @@ jobs:
           render_card "📘 Nyelvtan" "${grammar[@]}"
           render_card "🛒 Szituációk" "${situations[@]}"
 
-          # HTML vége
-          cat >> index.html <<'HTML'
-              </div>
-
-              <div class="hint">
-                Tipp: ha új leckét teszel fel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.
-              </div>
-            </div>
-          </body>
-          </html>
-          HTML
+          echo '</div>' >> index.html
+          echo '<div class="hint">Tipp: ha új leckét teszel fel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.</div>' >> index.html
+          echo '</div>' >> index.html
+          echo '</body></html>' >> index.html
 
       - name: Commit and push index.html
         shell: bash
@@ -242,5 +135,5 @@ jobs:
           fi
 
           git add index.html
-          git commit -m "Auto-generate main index.html [skip ci]"
+          git commit -m "Auto-generate main index.html (clickable cards) [skip ci]"
           git push
