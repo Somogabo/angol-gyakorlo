@@ -5,158 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GOANGOL – Főmenü</title>
   <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Arial, sans-serif;
-      min-height:100vh;
-      background: linear-gradient(135deg,#667eea,#764ba2);
-      padding: 28px 18px;
-      color:#1f2a44;
-      display:flex;
-      justify-content:center;
-    }
-    .wrap{width:min(980px,100%)}
-    .header{
-      text-align:center;
-      color:#fff;
-      margin-bottom:18px;
-    }
-    .header h1{
-      margin:0 0 8px;
-      font-size: clamp(26px, 3.2vw, 38px);
-      letter-spacing:.2px;
-    }
-    .header p{
-      margin:0;
-      opacity:.92;
-      font-weight:700;
-    }
-    .topbar{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      margin: 14px 0 18px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      border:0;
-      border-radius:12px;
-      padding:10px 14px;
-      background: rgba(255,255,255,.92);
-      color:#24324a;
-      text-decoration:none;
-      font-weight:800;
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
-    }
-    .btn:hover{transform: translateY(-1px)}
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap:14px;
-      margin-top:18px;
-    }
-    .card{
-      background: rgba(255,255,255,.98);
-      border-radius:16px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.22);
-      padding:16px 16px 10px;
-      border: 1px solid rgba(255,255,255,.35);
-    }
-    .card h2{
-      margin:2px 0 10px;
-      font-size:18px;
-      color:#355cff;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    ul{list-style:none;padding:0;margin:0}
-    li{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      background:#f1f4ff;
-      border:1px solid rgba(0,0,0,.06);
-      padding:10px 10px;
-      border-radius:12px;
-      margin-bottom:10px;
-    }
-    a.lesson{
-      color:#111827;
-      text-decoration:none;
-      font-weight:800;
-    }
-    a.lesson:hover{text-decoration:underline}
-    .tag{
-      font-size:12px;
-      font-weight:800;
-      color:#5b6375;
-      background:#ffffffa8;
-      border:1px solid rgba(0,0,0,.06);
-      padding:6px 10px;
-      border-radius:999px;
-    }
-    .hint{
-      text-align:center;
-      margin-top:16px;
-      color:rgba(255,255,255,.9);
-      font-weight:700;
-      font-size:12px;
-    }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    min-height:100vh;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    padding:28px 18px;
+    color:#1f2a44;
+    display:flex;
+    justify-content:center;
+  }
+  .wrap{width:min(980px,100%)}
+  header{text-align:center;color:#fff;margin-bottom:18px}
+  header h1{margin:0 0 6px;font-size:clamp(26px,3.2vw,38px)}
+  header p{margin:0;opacity:.9;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}
+  .card{background:rgba(255,255,255,.97);border-radius:16px;padding:14px;box-shadow:0 18px 45px rgba(0,0,0,.22)}
+  .card h2{margin:4px 6px 10px;font-size:18px;color:#355cff}
+  ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .lesson{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    padding:12px 14px;
+    border-radius:12px;
+    background:#f3f6ff;
+    text-decoration:none;
+    color:inherit;
+    transition:.15s;
+  }
+  .lesson:hover{background:#e9eeff;transform:translateY(-1px)}
+  .tag{font-size:12px;padding:3px 8px;border-radius:999px;background:#dbe4ff;color:#1f3cff;font-weight:700}
+  .hint{text-align:center;color:#fff;opacity:.85;margin-top:18px;font-size:13px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <h1>📚 GOANGOL – Főmenü</h1>
-      <p>Válassz leckét (Flashcards)</p>
-    </div>
-
-    <div class="topbar">
-      <a class="btn" href="auto-index.html">📋 Automatikus leckelista</a>
-      <a class="btn" href="index.html" onclick="location.reload(); return false;">🔄 Frissítés (újratöltés)</a>
-    </div>
-
-    <div class="grid">
-  <div class="card">
-    <h2>⚡ Phrasal Verbs</h2>
-    <ul>
-      <li><a class="lesson" href="flashcards/phrasal_verbs_alapfok_15_flashcards.html">phrasal verbs alapfok 15 flashcards</a><span class="tag">Flashcards</span></li>
-      <li><a class="lesson" href="flashcards/phrasal_verbs_alapfok_16_flashcards.html">phrasal verbs alapfok 16 flashcards</a><span class="tag">Flashcards</span></li>
-      <li><a class="lesson" href="flashcards/phrasal_verbs_flashcards.html">phrasal verbs flashcards</a><span class="tag">Flashcards</span></li>
-    </ul>
-  </div>
-  <div class="card">
-    <h2>🧩 Expressions / Kifejezések</h2>
-    <ul>
-      <li><a class="lesson" href="flashcards/expressions_19_flashcards.html">expressions 19 flashcards</a><span class="tag">Flashcards</span></li>
-      <li><a class="lesson" href="flashcards/expressions_alapfok_18_flashcards.html">expressions alapfok 18 flashcards</a><span class="tag">Flashcards</span></li>
-      <li><a class="lesson" href="flashcards/kifejezesek_alapfok_20_flashcards.html">kifejezesek alapfok 20 flashcards</a><span class="tag">Flashcards</span></li>
-    </ul>
-  </div>
-  <div class="card">
-    <h2>📘 Nyelvtan</h2>
-    <ul>
-      <li><a class="lesson" href="flashcards/megszamlalhato_megszamlalhatatlan_alapfok.html">megszamlalhato megszamlalhatatlan alapfok</a><span class="tag">Flashcards</span></li>
-    </ul>
-  </div>
-  <div class="card">
-    <h2>🛒 Szituációk</h2>
-    <ul>
-      <li><a class="lesson" href="flashcards/golife_elektromos_kutyu_flashcards.html">golife elektromos kutyu flashcards</a><span class="tag">Flashcards</span></li>
-      <li><a class="lesson" href="flashcards/present_perfect_flashcards.html">present perfect flashcards</a><span class="tag">Flashcards</span></li>
-    </ul>
-  </div>
-    </div>
-
-    <div class="hint">
-      Tipp: ha új leckét teszel fel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.
-    </div>
-  </div>
-</body>
-</html>
+<div class="wrap">
+<header>
+<h1>📚 GOANGOL – Főmenü</h1>
+<p>Válassz leckét (Flashcards)</p>
+</header>
+<div class="grid">
+<div class="card">
+<h2>⚡ Phrasal Verbs</h2>
+<ul>
+<li><a class="lesson" href="flashcards/phrasal_verbs_alapfok_15_flashcards.html"><span>Phrasal Verbs Alapfok 15 Flashcards</span><span class="tag">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/phrasal_verbs_alapfok_16_flashcards.html"><span>Phrasal Verbs Alapfok 16 Flashcards</span><span class="tag">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/phrasal_verbs_flashcards.html"><span>Phrasal Verbs Flashcards</span><span class="tag">Flashcards</span></a></li>
+</ul></div>
+<div class="card">
+<h2>🧩 Expressions / Kifejezések</h2>
+<ul>
+<li><a class="lesson" href="flashcards/expressions_19_flashcards.html"><span>Expressions 19 Flashcards</span><span class="tag">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/expressions_alapfok_18_flashcards.html"><span>Expressions Alapfok 18 Flashcards</span><span class="tag">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/kifejezesek_alapfok_20_flashcards.html"><span>Kifejezesek Alapfok 20 Flashcards</span><span class="tag">Flashcards</span></a></li>
+</ul></div>
+<div class="card">
+<h2>📘 Nyelvtan</h2>
+<ul>
+<li><a class="lesson" href="flashcards/megszamlalhato_megszamlalhatatlan_alapfok.html"><span>Megszamlalhato Megszamlalhatatlan Alapfok</span><span class="tag">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/present_perfect_flashcards.html"><span>Present Perfect Flashcards</span><span class="tag">Flashcards</span></a></li>
+</ul></div>
+<div class="card">
+<h2>🛒 Szituációk</h2>
+<ul>
+<li><a class="lesson" href="flashcards/golife_elektromos_kutyu_flashcards.html"><span>Golife Elektromos Kutyu Flashcards</span><span class="tag">Flashcards</span></a></li>
+</ul></div>
+</div>
+<div class="hint">Tipp: ha új leckét teszel fel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.</div>
+</div>
+</body></html>
