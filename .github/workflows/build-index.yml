@@ -1,4 +1,4 @@
-name: Build index (auto)
+name: Build index.html
 
 on:
   push:
@@ -7,56 +7,175 @@ on:
 
 jobs:
   build-index:
-    # Fontos: ne fusson végtelen ciklusban a saját commitja miatt
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate auto-index.html from /flashcards
-        shell: bash
+      - name: Build auto-index.html (GOANGOL style)
         run: |
-          set -e
-
           OUT="auto-index.html"
 
-          echo '<!doctype html>' > "$OUT"
-          echo '<html lang="hu"><head><meta charset="utf-8"><title>GOANGOL – Auto index</title></head><body>' >> "$OUT"
-          echo '<h1>GOANGOL – Automatikus lecke lista</h1>' >> "$OUT"
-          echo '<p>Ez a fájl GitHub Actions által generálva.</p>' >> "$OUT"
-          echo '<ul>' >> "$OUT"
+          cat > "$OUT" << 'HTML'
+          <!DOCTYPE html>
+          <html lang="hu">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>GOANGOL – Automatikus lecke lista</title>
+            <style>
+              body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: linear-gradient(180deg, #6b7bd6 0%, #6a59b3 100%);
+                color: #111;
+              }
+              .wrap {
+                max-width: 980px;
+                margin: 0 auto;
+                padding: 28px 18px 40px;
+              }
+              .title {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                color: #fff;
+                font-weight: 800;
+                font-size: 34px;
+                letter-spacing: 0.5px;
+                margin: 10px 0 6px;
+              }
+              .subtitle {
+                text-align: center;
+                color: rgba(255,255,255,0.9);
+                margin: 0 0 20px;
+              }
+              .bar {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin: 14px 0 22px;
+                flex-wrap: wrap;
+              }
+              .btn {
+                background: rgba(255,255,255,0.9);
+                border: 0;
+                border-radius: 12px;
+                padding: 10px 14px;
+                cursor: pointer;
+                text-decoration: none;
+                color: #222;
+                font-weight: 700;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+              }
+              .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 14px;
+              }
+              .card {
+                background: rgba(255,255,255,0.92);
+                border-radius: 18px;
+                padding: 14px 14px 12px;
+                box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+              }
+              .card h3 {
+                margin: 0 0 8px;
+                font-size: 16px;
+                color: #1f2a57;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              }
+              .list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: grid;
+                gap: 8px;
+              }
+              .item a {
+                display: block;
+                padding: 10px 12px;
+                border-radius: 12px;
+                background: rgba(0,0,0,0.03);
+                text-decoration: none;
+                color: #111;
+                font-weight: 700;
+              }
+              .item a:hover {
+                background: rgba(0,0,0,0.06);
+              }
+              .hint {
+                text-align: center;
+                color: rgba(255,255,255,0.85);
+                margin-top: 18px;
+                font-size: 13px;
+              }
+              .muted {
+                font-weight: 500;
+                opacity: 0.9;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="wrap">
+              <div class="title">📚 GOANGOL – Automatikus lecke lista</div>
+              <p class="subtitle">Ezt az oldalt a <span class="muted">GitHub Actions</span> generálja a repóban lévő flashcard HTML-ekből.</p>
 
-          if [ -d "flashcards" ]; then
-            for f in flashcards/*.html; do
-              [ -e "$f" ] || continue
-              base="$(basename "$f")"
-              echo "<li><a href=\"flashcards/$base\">$base</a></li>" >> "$OUT"
-            done
-          else
-            echo '<li>Nincs flashcards mappa.</li>' >> "$OUT"
-          fi
+              <div class="bar">
+                <a class="btn" href="./index.html">⬅️ Vissza a főmenübe</a>
+                <a class="btn" href="./auto-index.html">🔄 Frissítés (újratöltés)</a>
+              </div>
 
-          echo '</ul>' >> "$OUT"
-          echo '</body></html>' >> "$OUT"
+              <div class="grid">
+                <div class="card">
+                  <h3>⚡ Összes lecke</h3>
+                  <ul class="list" id="all-lessons">
+                    <!-- IDE kerülnek a linkek -->
+                  </ul>
+                </div>
+              </div>
 
-      - name: Commit & push if changed
-        shell: bash
-        run: |
-          set -e
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+              <div class="hint">Tipp: ha új leckét teszel fel, elég commitolni — az oldal automatikusan frissül.</div>
+            </div>
 
-          git add auto-index.html
+            <script>
+              // A linkeket a workflow fogja beírni ide HTML-ként.
+            </script>
+          </body>
+          </html>
+          HTML
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
+          # Gyűjtjük a flashcard html fájlokat (a flashcards mappából)
+          # és belerakjuk a listába.
+          ITEMS=$(find flashcards -type f -name "*.html" | sort || true)
+
+          # Ha nincs semmi, írjunk egy üzenetet
+          if [ -z "$ITEMS" ]; then
+            sed -i 's|<!-- IDE kerülnek a linkek -->|<li class="item"><a href="#">Nincs találat a flashcards mappában.</a></li>|' "$OUT"
             exit 0
           fi
 
-          git commit -m "Update auto-index.html"
+          # Összerakjuk a <li> elemeket
+          LIST=""
+          while IFS= read -r f; do
+            base=$(basename "$f")
+            name="${base%.html}"
+            # szebb cím: aláhúzás -> szóköz
+            pretty=$(echo "$name" | sed 's/_/ /g')
+            LIST="${LIST}<li class=\"item\"><a href=\"./flashcards/${base}\">${pretty}</a></li>"
+          done <<< "$ITEMS"
+
+          # Beillesztjük a listát a placeholder helyére
+          sed -i "s|<!-- IDE kerülnek a linkek -->|$LIST|" "$OUT"
+
+      - name: Commit auto-index.html if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add auto-index.html
+          git diff --cached --quiet || git commit -m "Update auto-index.html"
           git push
-
-
-
