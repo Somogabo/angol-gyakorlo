@@ -2,7 +2,7 @@ name: Build index.html
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build-index:
@@ -14,4 +14,10 @@ jobs:
 
       - name: Build index.html from flashcards
         run: |
-          echo "Index build placeholder – később ide jön az automatika"
+          echo "<!DOCTYPE html>" > index.html
+          echo "<html><head><meta charset='utf-8'><title>GOANGOL – Auto index</title></head>" >> index.html
+          echo "<body>" >> index.html
+          echo "<h1>GOANGOL – automatikus index</h1>" >> index.html
+          echo "<p>Ez az index GitHub Actions által generálva.</p>" >> index.html
+          echo "</body></html>" >> index.html
+
