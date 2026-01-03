@@ -4,255 +4,158 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GOANGOL – Főmenü</title>
-
   <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
       font-family: Arial, sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height:100vh;
+      background: linear-gradient(135deg,#667eea,#764ba2);
       padding: 28px 18px;
-      color: #1f2a44;
-      display: flex;
-      justify-content: center;
+      color:#1f2a44;
+      display:flex;
+      justify-content:center;
     }
-
-    .wrap {
-      width: min(1100px, 100%);
-    }
-
-    header {
-      text-align: center;
-      color: #fff;
+    .wrap{width:min(980px,100%)}
+    .header{
+      text-align:center;
+      color:#fff;
       margin-bottom: 18px;
     }
-
-    header h1 {
-      margin: 0 0 6px;
+    .header h1{
+      margin:0 0 8px;
       font-size: clamp(26px, 3.2vw, 38px);
-      letter-spacing: .3px;
+      letter-spacing:.2px;
     }
-
-    header p {
-      margin: 0;
-      opacity: .9;
-      font-weight: 600;
+    .header p{margin:0; opacity:.92; font-weight: 700;}
+    .topbar{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      margin: 14px 0 18px;
+      flex-wrap:wrap;
     }
-
-    .topbar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 16px 0 22px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
       border-radius: 12px;
       background: rgba(255,255,255,.92);
-      color: #203055;
-      text-decoration: none;
-      font-weight: 700;
-      box-shadow: 0 8px 22px rgba(0,0,0,.15);
-      transition: transform .15s ease, box-shadow .15s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 26px rgba(0,0,0,.22);
-    }
-
-    .searchbar {
-      display: flex;
-      justify-content: center;
-      margin: 10px 0 26px;
-    }
-
-    .searchbar input {
-      width: min(420px, 100%);
-      padding: 12px 14px;
-      border-radius: 14px;
-      border: none;
-      font-size: 16px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.15);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 10px 26px rgba(0,0,0,.18);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 36px rgba(0,0,0,.25);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
+      color:#203055;
+      text-decoration:none;
       font-weight: 900;
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.45);
     }
-
-    .pv { background: #ff8a00; }
-    .ex { background: #2dd4bf; }
-    .gr { background: #60a5fa; }
-    .sz { background: #fb7185; }
-
-    .card h2 {
-      margin: 0;
+    .btn:hover{transform: translateY(-1px)}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .card{
+      background: rgba(255,255,255,.98);
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+      padding: 16px 16px 10px;
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    .card h2{
+      margin: 2px 0 10px;
       font-size: 18px;
+      color:#355cff;
+      display:flex;
+      align-items:center;
+      gap:8px;
     }
-
-    .lesson {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f3f5fa;
+    ul{list-style:none; padding:0; margin:0}
+    li{margin: 10px 0}
+    a.lesson{
+      display:block;
+      text-decoration:none;
+      color:#1f2a44;
+      font-weight: 800;
       padding: 10px 12px;
       border-radius: 12px;
-      margin-top: 8px;
-      font-weight: 600;
+      border: 1px solid rgba(31,42,68,.12);
+      background: rgba(79,107,255,.06);
+      transition: transform .08s ease, background .15s ease;
     }
-
-    .badge {
-      background: #e5e7eb;
-      border-radius: 999px;
-      padding: 4px 10px;
+    a.lesson:hover{
+      transform: translateY(-1px);
+      background: rgba(79,107,255,.12);
+    }
+    .sub{
+      display:block;
+      margin-top: 4px;
       font-size: 12px;
+      font-weight: 800;
+      color: rgba(31,42,68,.65);
+    }
+    .footer{
+      text-align:center;
+      color: rgba(255,255,255,.9);
       font-weight: 700;
-    }
-
-    .new {
-      background: #22c55e;
-      color: #fff;
-      margin-left: 6px;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 28px;
-      color: rgba(255,255,255,.85);
-      font-size: 13px;
-      font-weight: 600;
+      margin-top: 16px;
+      font-size: 12px;
     }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-
-    <header>
+    <div class="header">
       <h1>📚 GOANGOL – Főmenü</h1>
       <p>Válassz leckét (Flashcards)</p>
-    </header>
+    </div>
 
     <div class="topbar">
       <a class="btn" href="auto-index.html">📋 Automatikus lecke lista</a>
     </div>
 
-    <div class="searchbar">
-      <input type="text" placeholder="🔍 Keresés (később aktiváljuk)">
-    </div>
-
     <div class="grid">
+      <section class="card">
+        <h2>⚡ Phrasal Verbs</h2>
+        <ul>
+<li><a class="lesson" href="flashcards/phrasal_verbs_alapfok_15_flashcards.html">Alapfok 15<span class="sub">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/phrasal_verbs_alapfok_16_flashcards.html">Alapfok 16<span class="sub">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/phrasal_verbs_flashcards.html">Alapfok (Phrasal Verbs)<span class="sub">Flashcards</span></a></li>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="icon pv">PV</div>
-          <h2>Phrasal Verbs</h2>
-        </div>
+        </ul>
+      </section>
 
-        <div class="lesson">
-          <span>alapfok 15</span>
-          <span class="badge">Flashcards</span>
-        </div>
+      <section class="card">
+        <h2>🧩 Expressions / Kifejezések</h2>
+        <ul>
+<li><a class="lesson" href="flashcards/expressions_19_flashcards.html">Expressions – 19<span class="sub">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/expressions_alapfok_18_flashcards.html">Expressions – Alapfok 18<span class="sub">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/kifejezesek_alapfok_20_flashcards.html">Kifejezések – Alapfok 20<span class="sub">Flashcards</span></a></li>
 
-        <div class="lesson">
-          <span>alapfok 16</span>
-          <span class="badge">Flashcards <span class="new">ÚJ</span></span>
-        </div>
-      </div>
+        </ul>
+      </section>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="icon ex">EX</div>
-          <h2>Expressions / Kifejezések</h2>
-        </div>
+      <section class="card">
+        <h2>📘 Nyelvtan</h2>
+        <ul>
+<li><a class="lesson" href="flashcards/megszamlalhato_megszamlalhatatlan_alapfok.html">Megszámlálható / megszámlálhatatlan<span class="sub">Flashcards</span></a></li>
+<li><a class="lesson" href="flashcards/present_perfect_flashcards.html">Present Perfect<span class="sub">Flashcards</span></a></li>
 
-        <div class="lesson">
-          <span>alapfok 18</span>
-          <span class="badge">Flashcards</span>
-        </div>
+        </ul>
+      </section>
 
-        <div class="lesson">
-          <span>19</span>
-          <span class="badge">Flashcards</span>
-        </div>
-      </div>
+      <section class="card">
+        <h2>🛒 Szituációk</h2>
+        <ul>
+<li><a class="lesson" href="flashcards/golife_elektromos_kutyu_flashcards.html">GoLife – elektromos kütyü<span class="sub">Flashcards</span></a></li>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="icon gr">NY</div>
-          <h2>Nyelvtan</h2>
-        </div>
-
-        <div class="lesson">
-          <span>Present Perfect</span>
-          <span class="badge">Flashcards</span>
-        </div>
-
-        <div class="lesson">
-          <span>Megszámlálható / megszámlálhatatlan</span>
-          <span class="badge">Flashcards</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="icon sz">SZ</div>
-          <h2>Szituációk</h2>
-        </div>
-
-        <div class="lesson">
-          <span>Golife elektromos kütyü</span>
-          <span class="badge">Flashcards</span>
-        </div>
-      </div>
-
+        </ul>
+      </section>
     </div>
 
-    <footer>
-      Tipp: ha új leckét teszel a flashcards mappába és commitolsz,  
-      az automatikus lista frissül.
-    </footer>
-
+    <div class="footer">
+      Tipp: ha új leckét teszel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.
+    </div>
   </div>
 </body>
 </html>
