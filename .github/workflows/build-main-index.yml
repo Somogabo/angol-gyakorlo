@@ -2,26 +2,490 @@ name: Build main index.html (GOANGOL)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
     paths:
-      - "auto-index.html"
+      - "flashcards/**"
       - ".github/workflows/build-main-index.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-main-index:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Copy auto-index.html to index.html (no commit)
+      - name: Generate index.html from flashcards (GOANGOL main menu)
+        shell: bash
         run: |
-          cp auto-index.html index.html
+          set -e
 
-      - name: Show result (debug)
+          FLASHDIR="flashcards"
+          OUT="index.html"
+
+          if [ ! -d "$FLASHDIR" ]; then
+            mkdir -p "$FLASHDIR"
+          fi
+
+          # Helper: pretty titles from file names
+          pretty_title () {
+            local base="$1"
+            base="${base%.html}"
+            base="${base//_/ }"
+            # common normalizations
+            base="${base/ flashcards/}"
+            # capitalize-ish (basic)
+            echo "$base" | awk '{for(i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2)}; print}'
+          }
+
+          # Helper: decide category by filename
+          category_of () {
+            local f="$1"
+            case "$f" in
+              phrasal_verbs*) echo "Phrasal Verbs|PV|#ff8a00" ;;
+              expressions*) echo "Expressions / Kifejezések|EX|#2dd4bf" ;;
+              kifejezesek*) echo "Expressions / Kifejezések|EX|#2dd4bf" ;;
+              present_perfect*) echo "Nyelvtan|NY|#60a5fa" ;;
+              megszamlalhato*) echo "Nyelvtan|NY|#60a5fa" ;;
+              *) echo "Szituációk|SZ|#fb7185" ;;
+            esac
+          }
+
+          # Collect lessons with metadata:
+          # file|title|catName|catKey|catColor|mtime|isNew
+          TMP="$(mktemp)"
+          NOW="$(date +%s)"
+          NEW_DAYS=14
+          NEW_SEC=$((NEW_DAYS*24*60*60))
+
+          shopt -s nullglob
+          for path in "$FLASHDIR"/*.html; do
+            file="$(basename "$path")"
+
+            # ignore generated helper pages if you ever add them under flashcards
+            if [[ "$file" == "index.html" || "$file" == "auto-index.html" ]]; then
+              continue
+            fi
+
+            title="$(pretty_title "$file")"
+            meta="$(category_of "$file")"
+            catName="$(echo "$meta" | cut -d'|' -f1)"
+            catKey="$(echo "$meta" | cut -d'|' -f2)"
+            catColor="$(echo "$meta" | cut -d'|' -f3)"
+
+            # last commit time of file (fallback to filesystem time)
+            mtime="$(git log -1 --format=%ct -- "$path" 2>/dev/null || true)"
+            if [ -z "$mtime" ]; then
+              mtime="$(stat -c %Y "$path")"
+            fi
+
+            age=$((NOW - mtime))
+            isNew="0"
+            if [ "$age" -le "$NEW_SEC" ]; then
+              isNew="1"
+            fi
+
+            echo "$file|$title|$catName|$catKey|$catColor|$mtime|$isNew" >> "$TMP"
+          done
+          shopt -u nullglob
+
+          # If no lessons, still build a friendly page
+          sort_key="${SORT_KEY:-alpha}" # default alpha
+
+          # Start HTML
+          cat > "$OUT" << 'HTML'
+          <!DOCTYPE html>
+          <html lang="hu">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>GOANGOL – Főmenü</title>
+            <style>
+              * { box-sizing: border-box; }
+
+              body{
+                margin:0;
+                font-family: Arial, sans-serif;
+                min-height:100vh;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                padding: 28px 18px;
+                color:#1f2a44;
+                display:flex;
+                justify-content:center;
+              }
+
+              .wrap{ width:min(1120px, 100%); }
+
+              header{
+                text-align:center;
+                color:#fff;
+                margin-bottom: 16px;
+              }
+              header h1{
+                margin:0 0 6px;
+                font-size: clamp(26px, 3.2vw, 40px);
+                letter-spacing:.3px;
+              }
+              header p{
+                margin:0;
+                opacity:.9;
+                font-weight:700;
+              }
+
+              .toolbar{
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                gap:10px;
+                flex-wrap:wrap;
+                margin: 16px 0 18px;
+              }
+
+              .btn{
+                display:inline-flex;
+                align-items:center;
+                gap:8px;
+                padding:10px 14px;
+                border-radius: 12px;
+                background: rgba(255,255,255,.92);
+                color:#203055;
+                text-decoration:none;
+                font-weight:800;
+                box-shadow: 0 8px 22px rgba(0,0,0,.15);
+                transition: transform .15s ease, box-shadow .15s ease;
+              }
+              .btn:hover{
+                transform: translateY(-2px);
+                box-shadow: 0 12px 26px rgba(0,0,0,.22);
+              }
+
+              .searchbar{
+                display:flex;
+                justify-content:center;
+                margin: 8px 0 16px;
+              }
+              .searchbar input{
+                width: min(520px, 100%);
+                padding: 12px 14px;
+                border-radius: 14px;
+                border: none;
+                font-size: 16px;
+                outline: none;
+                box-shadow: 0 6px 18px rgba(0,0,0,.15);
+              }
+
+              .sortbar{
+                display:flex;
+                justify-content:center;
+                gap:10px;
+                flex-wrap:wrap;
+                margin: 0 0 22px;
+              }
+              select{
+                border:none;
+                border-radius: 12px;
+                padding: 10px 12px;
+                font-weight: 800;
+                box-shadow: 0 6px 18px rgba(0,0,0,.15);
+                outline:none;
+              }
+
+              .grid{
+                display:grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 18px;
+              }
+
+              .card{
+                background:#fff;
+                border-radius: 18px;
+                padding: 16px;
+                box-shadow: 0 10px 26px rgba(0,0,0,.18);
+                transition: transform .18s ease, box-shadow .18s ease;
+                position: relative;
+                overflow: hidden;
+              }
+              .card:hover{
+                transform: translateY(-5px);
+                box-shadow: 0 16px 36px rgba(0,0,0,.25);
+              }
+
+              .card::before{
+                content:"";
+                position:absolute;
+                inset:0;
+                background: radial-gradient(circle at 20% 0%, rgba(255,255,255,.35), transparent 45%);
+                pointer-events:none;
+              }
+
+              .card-header{
+                display:flex;
+                align-items:center;
+                gap: 10px;
+                margin-bottom: 10px;
+              }
+
+              .icon{
+                width: 38px;
+                height: 38px;
+                border-radius: 12px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                color:#fff;
+                font-weight:900;
+                letter-spacing: .5px;
+                box-shadow: 0 10px 18px rgba(0,0,0,.12);
+                flex: 0 0 auto;
+              }
+
+              .card h2{
+                margin:0;
+                font-size: 18px;
+              }
+
+              .lesson{
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                background:#f3f5fa;
+                padding: 10px 12px;
+                border-radius: 12px;
+                margin-top: 10px;
+                font-weight: 800;
+                gap: 10px;
+                transition: transform .15s ease;
+              }
+
+              .lesson:hover{
+                transform: translateX(2px);
+              }
+
+              .lesson a{
+                color:#1f2a44;
+                text-decoration:none;
+                flex: 1;
+              }
+
+              .pill{
+                background:#e5e7eb;
+                border-radius: 999px;
+                padding: 4px 10px;
+                font-size: 12px;
+                font-weight: 900;
+                white-space: nowrap;
+              }
+
+              .new{
+                background:#22c55e;
+                color:#fff;
+                margin-left: 6px;
+              }
+
+              .empty{
+                background: rgba(255,255,255,.92);
+                border-radius: 18px;
+                padding: 18px;
+                text-align:center;
+                font-weight: 800;
+                box-shadow: 0 10px 26px rgba(0,0,0,.18);
+              }
+
+              footer{
+                text-align:center;
+                margin-top: 26px;
+                color: rgba(255,255,255,.85);
+                font-size: 13px;
+                font-weight: 700;
+              }
+            </style>
+          </head>
+
+          <body>
+            <div class="wrap">
+
+              <header>
+                <h1>📚 GOANGOL – Főmenü</h1>
+                <p>Automatikusan frissül a flashcards mappából</p>
+              </header>
+
+              <div class="toolbar">
+                <a class="btn" href="auto-index.html">📋 Automatikus lecke lista</a>
+                <a class="btn" href="./">🔄 Frissítés</a>
+              </div>
+
+              <div class="searchbar">
+                <input id="q" type="text" placeholder="🔍 Keresés lecke címre..." autocomplete="off" />
+              </div>
+
+              <div class="sortbar">
+                <select id="sort">
+                  <option value="alpha">ABC szerint</option>
+                  <option value="newest">Legújabb elöl</option>
+                </select>
+              </div>
+
+              <div id="grid" class="grid"></div>
+
+              <footer>
+                Tipp: ha új leckét teszel fel a flashcards mappába és commitolsz, a főmenü automatikusan frissül.
+              </footer>
+
+            </div>
+
+            <script>
+              // This array is injected by the workflow
+              const LESSONS = [];
+              const grid = document.getElementById("grid");
+              const q = document.getElementById("q");
+              const sortSel = document.getElementById("sort");
+
+              function iconStyle(color){
+                return `background:${color};`;
+              }
+
+              function groupByCategory(items){
+                const map = new Map();
+                for(const it of items){
+                  if(!map.has(it.catName)){
+                    map.set(it.catName, {catName: it.catName, catKey: it.catKey, catColor: it.catColor, lessons: []});
+                  }
+                  map.get(it.catName).lessons.push(it);
+                }
+                return Array.from(map.values());
+              }
+
+              function render(){
+                const query = (q.value || "").trim().toLowerCase();
+                const sortMode = sortSel.value;
+
+                let items = LESSONS.slice();
+
+                if(query){
+                  items = items.filter(x => x.title.toLowerCase().includes(query));
+                }
+
+                // sort inside categories
+                if(sortMode === "newest"){
+                  items.sort((a,b) => (b.mtime - a.mtime) || a.title.localeCompare(b.title));
+                } else {
+                  items.sort((a,b) => a.title.localeCompare(b.title) || (b.mtime - a.mtime));
+                }
+
+                grid.innerHTML = "";
+
+                if(items.length === 0){
+                  const div = document.createElement("div");
+                  div.className = "empty";
+                  div.textContent = query ? "Nincs találat a keresésre." : "Még nincs lecke a flashcards mappában.";
+                  grid.appendChild(div);
+                  return;
+                }
+
+                const groups = groupByCategory(items);
+
+                for(const g of groups){
+                  const card = document.createElement("div");
+                  card.className = "card";
+
+                  const header = document.createElement("div");
+                  header.className = "card-header";
+
+                  const icon = document.createElement("div");
+                  icon.className = "icon";
+                  icon.setAttribute("style", iconStyle(g.catColor));
+                  icon.textContent = g.catKey;
+
+                  const h2 = document.createElement("h2");
+                  h2.textContent = g.catName;
+
+                  header.appendChild(icon);
+                  header.appendChild(h2);
+                  card.appendChild(header);
+
+                  for(const l of g.lessons){
+                    const row = document.createElement("div");
+                    row.className = "lesson";
+                    row.dataset.title = l.title.toLowerCase();
+
+                    const a = document.createElement("a");
+                    a.href = `flashcards/${l.file}`;
+                    a.textContent = l.title;
+
+                    const pill = document.createElement("span");
+                    pill.className = "pill";
+                    pill.textContent = "Flashcards";
+
+                    if(l.isNew){
+                      const n = document.createElement("span");
+                      n.className = "pill new";
+                      n.textContent = "ÚJ";
+                      pill.appendChild(n);
+                    }
+
+                    row.appendChild(a);
+                    row.appendChild(pill);
+                    card.appendChild(row);
+                  }
+
+                  grid.appendChild(card);
+                }
+              }
+
+              q.addEventListener("input", render);
+              sortSel.addEventListener("change", render);
+
+              // default sort = ABC
+              sortSel.value = "alpha";
+              render();
+            </script>
+          </body>
+          </html>
+          HTML
+
+          # Inject lessons array into the generated HTML
+          # Build a JS snippet and insert after "const LESSONS = [];" by replacing that line.
+          JS_TMP="$(mktemp)"
+          echo "const LESSONS = [" > "$JS_TMP"
+
+          if [ -s "$TMP" ]; then
+            # default: alpha order for stable output
+            sort -t'|' -k2,2 "$TMP" | while IFS='|' read -r file title catName catKey catColor mtime isNew; do
+              # escape quotes
+              esc_title="${title//\"/\\\"}"
+              esc_catName="${catName//\"/\\\"}"
+              echo "  { file: \"${file}\", title: \"${esc_title}\", catName: \"${esc_catName}\", catKey: \"${catKey}\", catColor: \"${catColor}\", mtime: ${mtime}, isNew: ${isNew} }," >> "$JS_TMP"
+            done
+          fi
+          echo "];" >> "$JS_TMP"
+
+          # Replace the placeholder line in OUT
+          # Note: use a safe delimiter for sed
+          perl -0777 -i -pe 's/const LESSONS = \[\];/do { local $\/; open my $fh, "<", "'$JS_TMP'"; my $js=<$fh>; $js =~ s/\\/\\\\/g; $js =~ s/\$/\\\$/g; $js }/e' "$OUT"
+
+          rm -f "$TMP" "$JS_TMP"
+
+      - name: Commit and push if changed
+        shell: bash
         run: |
-          echo "index.html first lines:"
-          head -n 20 index.html
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+
+          if git diff --cached --quiet; then
+            echo "No changes in index.html"
+            exit 0
+          fi
+
+          git commit -m "Auto-generate index.html (GOANGOL) [skip ci]"
+
+          # Pull/rebase to avoid non-fast-forward, then push
+          git pull --rebase origin main
+          git push origin main
