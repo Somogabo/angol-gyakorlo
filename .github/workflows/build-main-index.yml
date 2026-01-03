@@ -5,8 +5,10 @@ on:
     branches: [ "main" ]
     paths:
       - "auto-index.html"
-      - "flashcards/**"
       - ".github/workflows/build-main-index.yml"
+
+permissions:
+  contents: read
 
 jobs:
   build-main-index:
@@ -15,13 +17,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy auto-index to main index
+      - name: Copy auto-index.html to index.html (no commit)
         run: |
           cp auto-index.html index.html
 
-      - name: Commit index.html
-        uses: EndBug/add-and-commit@v9
-        with:
-          add: "index.html"
-          message: "Auto-generate main index.html from auto-index.html [skip ci]"
-          default_author: github_actions
+      - name: Show result (debug)
+        run: |
+          echo "index.html first lines:"
+          head -n 20 index.html
